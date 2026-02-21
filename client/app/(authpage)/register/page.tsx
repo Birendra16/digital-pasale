@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import axios from 'axios';
 import { User, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const RegisterPage = () => {
   const router = useRouter();
@@ -19,16 +20,16 @@ const RegisterPage = () => {
 
   const handleRegister = async (values: { name: string; email: string; password: string }) => {
   try {
-    await axios.post('http://localhost:8080/api/auth/register', {
+    const response= await axios.post('http://localhost:8080/api/auth/register', {
       username: values.name, 
       email: values.email,
       password: values.password,
     });
 
-    alert('Registration successful');
+    toast(response.data.message || 'Registration successful');
     router.push('/login');
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Registration failed');
+    toast(err.response?.data?.message || 'Registration failed');
   }
 };
 

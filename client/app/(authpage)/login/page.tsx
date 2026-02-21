@@ -6,8 +6,11 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { User, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const LoginPage = () => {
+const router = useRouter();
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
     password: Yup.string().required('Password is required'),
@@ -15,10 +18,14 @@ const LoginPage = () => {
 
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
-      await axios.post('http://localhost:8080/api/auth/login', values);
-      alert('Login successful');
-    } catch (err) {
-      alert('Login failed');
+      const response= await axios.post('http://localhost:8080/api/auth/login', values);
+      const {token, user}= response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      toast(response.data.message || 'Login successful');
+      router.push('/owner');
+    } catch (err:any) {
+      toast(err.response?.data?.message || 'Login failed');
     }
   };
 

@@ -1,4 +1,4 @@
-import { BarChart2, BarChart3, Boxes, Calendar, FileBarChart, Home, Inbox, Package, Search, Settings, ShoppingBag, UserCog, Users } from "lucide-react"
+import { BarChart3, Boxes, FileBarChart, Home, Package, UserCog, Users } from "lucide-react"
 
 import {
   Sidebar,

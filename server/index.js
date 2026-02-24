@@ -4,6 +4,11 @@ import Connect from "./db/connect.js";
 import authRouter from "./routes/user.js";
 import subscriptionRouter from "./routes/subscription.js";
 import cors from "cors";
+import productRouter from "./routes/product.js";
+
+import "./models/unit.js";
+import "./models/product.js";
+import unitRouter from "./routes/unit.js";
 
 dotenv.config();
 
@@ -19,6 +24,8 @@ Connect();
 
 app.use("/api/auth", authRouter);
 app.use("/api/subscription", subscriptionRouter);
+app.use("/api/products", productRouter);
+app.use("/api/units", unitRouter);
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => {

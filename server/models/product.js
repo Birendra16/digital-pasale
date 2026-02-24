@@ -53,16 +53,16 @@ const ProductSchema = new mongoose.Schema({
 );
 
 // Ensure base unit exists with conversion =1
-ProductSchema.pre("save", function(next){
+ProductSchema.pre("save", function(){
     const baseExists = this.units.some(
         u =>
             u.unit.toString()===this.baseUnit.toString() &&
             u.conversionToBase===1
     );
     if(!baseExists){
-        return next(new Error("Base unit must have conversionToBase=1"));
+        throw new Error ("Base unit must have conversionToBase=1");
     }
-    next();
+    
 });
 
 const Product = mongoose.model("Product", ProductSchema);

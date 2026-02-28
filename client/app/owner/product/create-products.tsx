@@ -11,11 +11,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+
 
 interface Unit {
   _id: string
@@ -23,29 +24,55 @@ interface Unit {
   symbol: string
 }
 
+interface CreateProductPayload {
+  name: string
+  sku: string
+  baseUnit: string
+  units: {
+    unit: string
+    conversionToBase: number
+    sellingPrice?: number
+    costPrice?: number
+  }[]
+}
+
 interface CreateProductsProps {
-  createProduct: (payload: any) => Promise<void>
+  createProduct: (payload: CreateProductPayload) => Promise<void>
 }
 
 export default function CreateProducts({ createProduct }: CreateProductsProps) {
   const [units, setUnits] = useState<Unit[]>([])
+  const [loadingUnits, setLoadingUnits] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
   const [name, setName] = useState("")
   const [sku, setSku] = useState("")
   const [baseUnit, setBaseUnit] = useState("")
-  const [sellingPrice, setSellingPrice] = useState<string>("")
-  const [costPrice, setCostPrice] = useState<string>("")
+  const [sellingPrice, setSellingPrice] = useState("")
+  const [costPrice, setCostPrice] = useState("")
+
   const [showUnitForm, setShowUnitForm] = useState(false)
   const [unitName, setUnitName] = useState("")
   const [unitSymbol, setUnitSymbol] = useState("")
 
-  // Fetch units on mount
+  // Fetch units
   useEffect(() => {
-    axios.get("http://localhost:8080/api/units")
-      .then(res => setUnits(res.data.units))
-      .catch(err => console.error(err))
+    const fetchUnits = async () => {
+      try {
+        setLoadingUnits(true)
+        const res = await axios.get("http://localhost:8080/api/units")
+        setUnits(res.data.units)
+      } catch (error) {
+        toast("Failed to load units")
+      } finally {
+        setLoadingUnits(false)
+      }
+    }
+
+    fetchUnits()
   }, [])
 
-  // Create a new unit
+  // Create unit
   const createUnit = async () => {
     if (!unitName || !unitSymbol) {
       toast("Unit name and symbol are required")
@@ -55,26 +82,23 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
     try {
       const { data } = await axios.post("http://localhost:8080/api/units", {
         name: unitName,
-        symbol: unitSymbol
+        symbol: unitSymbol,
       })
 
-      // Add unit to dropdown
       setUnits(prev => [...prev, data.unit])
-
-      // Auto select as base unit
       setBaseUnit(data.unit._id)
 
-      // Reset + hide form
       setUnitName("")
       setUnitSymbol("")
       setShowUnitForm(false)
-    } catch (error) {
-      console.error(error)
+
+      toast("Unit created")
+    } catch {
       toast("Failed to create unit")
     }
   }
 
-  // Submit new product
+  // Submit product
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -83,7 +107,7 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
       return
     }
 
-    const payload = {
+    const payload: CreateProductPayload = {
       name,
       sku,
       baseUnit,
@@ -91,29 +115,39 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
         {
           unit: baseUnit,
           conversionToBase: 1,
-          sellingPrice: Number(sellingPrice) || 0,
-          costPrice: Number(costPrice) || 0,
-        }
-      ]
+          sellingPrice: sellingPrice === "" ? undefined : Number(sellingPrice),
+          costPrice: costPrice === "" ? undefined : Number(costPrice),
+        },
+      ],
     }
 
     try {
+      setSubmitting(true)
       await createProduct(payload)
 
-      // Reset form
-      setName("")
-      setSku("")
-      setBaseUnit("")
-      setSellingPrice("")
-      setCostPrice("")
-    } catch (error) {
-      console.error(error)
+      toast("Product created Successfully !")
+
+      resetForm()
+    } catch {
       toast("Failed to create product")
+    } finally {
+      setSubmitting(false)
     }
   }
 
+  const resetForm = () => {
+    setName("")
+    setSku("")
+    setBaseUnit("")
+    setSellingPrice("")
+    setCostPrice("")
+    setShowUnitForm(false)
+    setUnitName("")
+    setUnitSymbol("")
+  }
+
   return (
-    <Dialog>
+    <Dialog onOpenChange={open => !open && resetForm()}>
       <DialogTrigger asChild>
         <Button>Add Product</Button>
       </DialogTrigger>
@@ -143,9 +177,12 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
                   className="w-full border rounded h-9 px-2"
                   value={baseUnit}
                   onChange={e => setBaseUnit(e.target.value)}
+                  disabled={loadingUnits}
                   required
                 >
-                  <option value="">Select Unit</option>
+                  <option value="">
+                    {loadingUnits ? "Loading units..." : "Select Unit"}
+                  </option>
                   {units.map(u => (
                     <option key={u._id} value={u._id}>
                       {u.name} ({u.symbol})
@@ -156,7 +193,7 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setShowUnitForm(!showUnitForm)}
+                  onClick={() => setShowUnitForm(v => !v)}
                 >
                   + Add Unit
                 </Button>
@@ -203,15 +240,13 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
               <Label>Selling Price</Label>
               <Input
                 type="number"
-                min = {0}
+                min={0}
+                step="0.01"
                 value={sellingPrice}
-                onChange={e => 
-                {
-                    const val= e.target.value;
-                    if(val === "" || Number(val) >=0) 
-                    setSellingPrice(val)
-                }
-            }     
+                onChange={e => {
+                  const val = e.target.value
+                  if (val === "" || Number(val) >= 0) setSellingPrice(val)
+                }}
               />
             </div>
 
@@ -219,23 +254,26 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
               <Label>Cost Price</Label>
               <Input
                 type="number"
-                min= {0}
+                min={0}
+                step="0.01"
                 value={costPrice}
-                onChange={e =>{
-                    const val= e.target.value;
-                    if(val === "" || Number(val) >=0)
-                    setCostPrice(val)
-                }
-            }    
+                onChange={e => {
+                  const val = e.target.value
+                  if (val === "" || Number(val) >= 0) setCostPrice(val)
+                }}
               />
             </div>
           </div>
 
           <DialogFooter className="mt-4">
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" disabled={submitting}>
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="submit">Save</Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Saving..." : "Save"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

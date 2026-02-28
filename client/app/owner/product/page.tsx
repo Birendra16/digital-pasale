@@ -4,6 +4,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import CreateProducts from './create-products'
 import ProductsTable from './products-table'
+import { toast } from 'sonner'
 
 const Products = () => {
   const [products, setProducts] = useState([])
@@ -15,17 +16,17 @@ const Products = () => {
 
   const createProduct = async (productInfo: any) => {
     await axios.post("http://localhost:8080/api/products", productInfo)
-    fetchProducts()
+    fetchProducts();
   }
 
   const editProduct = async (id: string, productInfo: any) => {
     await axios.put(`http://localhost:8080/api/products/${id}`, productInfo)
-    fetchProducts()
+    fetchProducts();
   }
 
   const deleteProduct = async (id: string) => {
     await axios.delete(`http://localhost:8080/api/products/${id}`)
-    fetchProducts()
+    fetchProducts();
   }
 
   useEffect(() => {
@@ -34,7 +35,7 @@ const Products = () => {
 
   return (
     <div className="space-y-4">
-      <CreateProducts createProduct={createProduct} />
+      <CreateProducts createProduct={createProduct} fetchProducts={fetchProducts} />
       <ProductsTable
         products={products}
         deleteProduct={deleteProduct}

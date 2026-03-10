@@ -2,6 +2,24 @@ import Product from "../models/product.js"
 
 const createProduct = async (req, res)=>{
     try{
+        // Check if SKU exists (even soft deleted)
+        const existing = await Product.findOne({sku: req.body.sku});
+        if(existing){
+        if(existing.isActive){
+            return res.status(400).json({message:"SKU already exists"});
+        }
+        else {
+            // Reactivate soft deleted product
+            existing.name = req.body.name;
+            existing.baseUnit = req.body.baseUnit;
+            existing.units = req.body.units;
+            existing.vatPercent = req.body.vatPercent;
+            existing.isActive = true;
+            await existing.save();
+            return res.status(200).json({message:"Product reactivated", product: existing})
+        }
+        }
+
         const product = await Product.create(req.body);
         res.status(201).json({message:"Product created", product})
     }catch(err){

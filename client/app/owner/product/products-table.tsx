@@ -15,103 +15,88 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 
-const columns = [
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "sku",
-    header: "SKU",
-  },
-  {
-    accessorKey: "baseUnit.name",
-    header: "Base Unit",
-  },
-  {
-    header: "Cost Price",
-    accessorFn: (row) => row.units?.[0]?.costPrice,
-    cell: ({ getValue }) => `Rs. ${getValue()}`
-  },
-  {
-  header: "Selling Price",
-  accessorFn: (row) => row.units?.[0]?.sellingPrice,
-  cell: ({ getValue }) => `Rs. ${getValue()}`
-  },
-   {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original
+import EditProduct from "./edit-product"
+import DeleteProduct from "./delete-product"
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {/* <EditProduct item={row.original}/>
-            <DeleteProduct item={row.original}/> */}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    }
-  }
-]
-
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+interface Product {
+  _id: string
+  name: string
+  sku: string
+  baseUnit: { _id: string; name: string; symbol: string }
+  units: { unit: string; sellingPrice: number; costPrice: number }[]
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  })
+interface ProductsTableProps {
+  products: Product[]
+  isLoading: boolean
+  editProduct: (id: string, data: any) => Promise<void>
+  deleteProduct: (id: string) => Promise<void>
+}
+
+export default function ProductsTable({ products, isLoading, editProduct, deleteProduct }: ProductsTableProps) {
+  const columns: ColumnDef<Product>[] = [
+    { accessorKey: "name", header: "Name" },
+    { accessorKey: "sku", header: "SKU" },
+    { accessorFn: row => row.baseUnit?.name, header: "Base Unit" },
+    { accessorFn: row => row.units?.[0]?.costPrice, header: "Cost Price", cell: ({ getValue }) => `Rs. ${getValue()}` },
+    { accessorFn: row => row.units?.[0]?.sellingPrice, header: "Selling Price", cell: ({ getValue }) => `Rs. ${getValue()}` },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const product = row.original
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <EditProduct product={product} editProduct={editProduct} />
+              <DeleteProduct productId={product._id} deleteProduct={deleteProduct} />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      }
+    }
+  ]
+
+  const table = useReactTable({ data: products, columns, getCoreRowModel: getCoreRowModel() })
 
   return (
     <div className="overflow-hidden rounded-md border">
       <Table>
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
+          {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                )
-              })}
+              {headerGroup.headers.map(header => (
+                <TableHead key={header.id}>
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="text-center h-24">
+                Loading products...
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows.length ? (
+            table.getRowModel().rows.map(row => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map(cell => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
@@ -120,8 +105,8 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+              <TableCell colSpan={columns.length} className="text-center h-24">
+                No products found
               </TableCell>
             </TableRow>
           )}
@@ -130,16 +115,3 @@ export function DataTable<TData, TValue>({
     </div>
   )
 }
-
-const ProductsTable = (props)=>{
-return(
-  <div>
-    <div className="flex flex-wrap justify-center">
-      <DataTable columns={columns} data={props.products} />
-    </div>
-    </div>
-)
-
-}
-
-export default ProductsTable

@@ -22,39 +22,38 @@ interface Unit {
   symbol: string
 }
 
-interface CreateProductPayload {
+interface Product {
+  _id: string
   name: string
   sku: string
-  baseUnit: string
-  units: {
-    unit: string
-    conversionToBase: number
-    sellingPrice: number
-    costPrice: number
-  }[]
+  baseUnit: { _id: string; name: string; symbol: string } | null
+  units: { unit: string; sellingPrice: number; costPrice: number }[]
 }
 
-interface CreateProductsProps {
-  createProduct: (payload: CreateProductPayload) => Promise<void>
+interface EditProductProps {
+  product: Product
+  editProduct: (id: string, data: any) => Promise<void>
 }
 
-export default function CreateProducts({ createProduct }: CreateProductsProps) {
+export default function EditProduct({ product, editProduct }: EditProductProps) {
   const [units, setUnits] = useState<Unit[]>([])
   const [loadingUnits, setLoadingUnits] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  const [name, setName] = useState("")
-  const [sku, setSku] = useState("")
-  const [baseUnit, setBaseUnit] = useState("")
-  const [sellingPrice, setSellingPrice] = useState("0")
-  const [costPrice, setCostPrice] = useState("0")
+  // Use safe fallback if baseUnit is null
+  const [name, setName] = useState(product.name || "")
+  const [sku, setSku] = useState(product.sku || "")
+  const [baseUnit, setBaseUnit] = useState(product.baseUnit?._id || "")
+  const [sellingPrice, setSellingPrice] = useState(product.units?.[0]?.sellingPrice || 0)
+  const [costPrice, setCostPrice] = useState(product.units?.[0]?.costPrice || 0)
 
+  // Fetch all units
   useEffect(() => {
     const fetchUnits = async () => {
       try {
         setLoadingUnits(true)
         const res = await axios.get("http://localhost:8080/api/units")
-        setUnits(res.data?.units || [])
+        setUnits(res.data.units)
       } catch {
         toast.error("Failed to load units")
       } finally {
@@ -65,11 +64,11 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
   }, [])
 
   const resetForm = () => {
-    setName("")
-    setSku("")
-    setBaseUnit("")
-    setSellingPrice("0")
-    setCostPrice("0")
+    setName(product.name || "")
+    setSku(product.sku || "")
+    setBaseUnit(product.baseUnit?._id || "")
+    setSellingPrice(product.units?.[0]?.sellingPrice || 0)
+    setCostPrice(product.units?.[0]?.costPrice || 0)
   }
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -79,7 +78,7 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
       return
     }
 
-    const payload: CreateProductPayload = {
+    const payload = {
       name,
       sku,
       baseUnit,
@@ -95,37 +94,36 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
 
     try {
       setSubmitting(true)
-      await createProduct(payload)
-      toast.success("Product created successfully!")
-      resetForm()
+      await editProduct(product._id, payload)
+      toast.success("Product updated successfully")
     } catch {
-      toast.error("Failed to create product")
+      toast.error("Failed to update product")
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <Dialog onOpenChange={(open) => !open && resetForm()}>
+    <Dialog onOpenChange={open => !open && resetForm()}>
       <DialogTrigger asChild>
-        <Button>Add Product</Button>
+        <Button variant="outline">Edit</Button>
       </DialogTrigger>
 
       <DialogContent>
         <form onSubmit={onSubmit}>
           <DialogHeader>
-            <DialogTitle>Add Product</DialogTitle>
+            <DialogTitle>Edit Product</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-3">
             <div className="flex flex-col gap-1">
               <Label>Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input value={name} onChange={e => setName(e.target.value)} required />
             </div>
 
             <div className="flex flex-col gap-1">
               <Label>SKU</Label>
-              <Input value={sku} onChange={(e) => setSku(e.target.value)} required />
+              <Input value={sku} onChange={e => setSku(e.target.value)} required />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -133,14 +131,14 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
               <select
                 className="w-full border rounded h-9 px-2"
                 value={baseUnit}
-                onChange={(e) => setBaseUnit(e.target.value)}
+                onChange={e => setBaseUnit(e.target.value)}
                 disabled={loadingUnits}
                 required
               >
                 <option value="" disabled hidden>
                   {loadingUnits ? "Loading units..." : "Select Unit"}
                 </option>
-                {units.map((u) => (
+                {units.map(u => (
                   <option key={u._id} value={u._id}>
                     {u.name} ({u.symbol})
                   </option>
@@ -155,7 +153,7 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
                 min={0}
                 step="1"
                 value={sellingPrice}
-                onChange={(e) => setSellingPrice(e.target.value)}
+                onChange={e => setSellingPrice(e.target.value)}
                 required
               />
             </div>
@@ -167,7 +165,7 @@ export default function CreateProducts({ createProduct }: CreateProductsProps) {
                 min={0}
                 step="1"
                 value={costPrice}
-                onChange={(e) => setCostPrice(e.target.value)}
+                onChange={e => setCostPrice(e.target.value)}
                 required
               />
             </div>

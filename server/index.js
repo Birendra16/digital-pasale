@@ -9,6 +9,7 @@ import productRouter from "./routes/product.js";
 import "./models/unit.js";
 import "./models/product.js";
 import unitRouter from "./routes/unit.js";
+import inventoryRouter from "./routes/inventory.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/subscription", subscriptionRouter);
 app.use("/api/products", productRouter);
 app.use("/api/units", unitRouter);
+app.use("/api/inventory", inventoryRouter);
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => {

@@ -23,54 +23,81 @@ const getInventory = async (req, res) => {
 
 // Update stock
 const updateStock = async (req, res) => {
+    const session = await mongoose.startSession()
+    session.startTransaction()
     try {
-        const { productId, unitId, quantityIn, quantityOut, damaged, reason, expiryDate } = req.body;
+        const { productId, unitId, quantityIn, quantityOut, damaged, reason, expiryDate,movementType } = req.body;
 
         let inventory = await Inventory.findOne({
             product: productId,
             unit: unitId
-        });
+        }).session(session)
 
         // create inventory if not exists
         if (!inventory) {
-            inventory = await Inventory.create({
+            inventory = await Inventory.create([{
                 product: productId,
                 unit: unitId,
                 quantity: 0,
                 damaged: 0,
                 expiryDate
-            });
+            }], {session})
+            inventory = inventory[0]
         }
 
         // update quantities
-        if (quantityIn) inventory.quantity += quantityIn;
-        if (quantityOut) inventory.quantity -= quantityOut;
+        if(quantityOut && inventory.quantity < quantityOut){
+            throw new Error("Not enough stock available")
+        }
+        if (quantityIn){
+             inventory.quantity += quantityIn
+        }
+        if (quantityOut){
+             inventory.quantity -= quantityOut
+        }
 
         if (damaged) {
+            if (inventory.quantity < damaged) {
+                throw new Error("Not enough stock for damaged record")
+            }
             inventory.damaged += damaged;
             inventory.quantity -= damaged;
         }
 
-        if (expiryDate) inventory.expiryDate = expiryDate;
+        if (expiryDate) {
+            inventory.expiryDate = expiryDate
+        }
 
-        await inventory.save();
+        await inventory.save({session});
 
         // create stock log
-        const log = await StockLog.create({
+        const log = await StockLog.create([{
             inventory: inventory._id,
             quantityIn: quantityIn || 0,
             quantityOut: quantityOut || 0,
             damaged: damaged || 0,
+            movementType,
             reason
-        });
+        }], {session});
+
+        // commit transaction
+        await session.commitTransaction()
+        session.endSession()
+
+        //low stock alert
+        const lowStockAlert =
+        inventory.quantity <= inventory.lowStockThreshold
 
         res.status(200).json({
             message: "Stock updated successfully",
             inventory,
-            log
+            log,
+            lowStockAlert
         });
 
     } catch (err) {
+        await session.abortTransaction()
+        session.endSession()
         res.status(500).json({
             message: "Error updating stock",
             error: err.message

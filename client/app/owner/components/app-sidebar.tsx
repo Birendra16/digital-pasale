@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, FileBarChart, Home, Package, Settings, UserCog, Users } from "lucide-react"
+import { BarChart3, Boxes, FileBarChart, Home, Package, Settings, ShoppingBasketIcon, UserCog, Users } from "lucide-react"
 
 import {
   Sidebar,
@@ -39,9 +39,9 @@ const items = [
     icon: BarChart3,
   },
   {
-    title: "Staff",
-    url: "/owner/user",
-    icon: UserCog,
+    title: "Purchase",
+    url: "/owner/purchase",
+    icon: ShoppingBasketIcon,
   },
   {
     title: "Settings",

@@ -9,7 +9,8 @@
 ### ✅ Phase 1 – Minimum Viable Product (Core Features)
 - [x] **Authentication & User Roles (Owner / Staff):** Secure login with owner-first setup; owner can create staff accounts.  
 - [x] **Product Module:** Manage products with multiple units and unit conversions (carton, sack, dozen, piece, kg).  
-- [ ] **Inventory Module:** Track stock in/out, damaged goods, expiry dates, and low stock alerts.  
+- [x] **Inventory Module:** Track stock in/out, damaged goods, expiry dates, and low stock alerts.  
+- [x] **Purchase Module:** Record purchases that update inventory and stock logs.  
 - [ ] **Sales / POS Module:** Fast billing, bulk quantity support, VAT 13% auto-calculation, invoice generation, partial payments.  
 - [ ] **Customer Module:** Credit management, ledger tracking, partial payments, total dues.  
 - [ ] **Basic Reports:** Daily sales, stock valuation, customer due report.

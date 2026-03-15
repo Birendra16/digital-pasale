@@ -23,12 +23,12 @@ interface Unit {
 
 interface Props {
   unit: Unit
-  editUnit: (id: string, data: any) => Promise<void> // 🔴 CHANGED
+  editUnit: (id: string, data: any) => Promise<void> 
 }
 
 export default function EditUnit({ unit, editUnit }: Props) {
 
-const [name,setName] = useState(unit.name) // 🔴 CHANGED
+const [name,setName] = useState(unit.name) 
 const [symbol,setSymbol] = useState(unit.symbol)
 const [isFractional,setIsFractional] = useState(unit.isFractional)
 

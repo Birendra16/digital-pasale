@@ -8,13 +8,6 @@ const supplierSchema = new mongoose.Schema({
     email: String,
     address: String,
     taxNumber: String,
-    status: {
-        type: String,
-        enum: ["active", "inactive"],
-        default: "active"
-    },
-    notes: String
-
 },
 {timestamps: true}
 );

@@ -20,7 +20,7 @@ const StockLogSchema = new mongoose.Schema({
     },
     movementType:{
         type:String,
-        enum:["PURCHASE","SALE","DAMAGE","ADJUSTMENT","RETURN"],
+        enum:["PURCHASE","SALE","DAMAGE","ADJUSTMENT","RETURN","PURCHASE_RETURN"],
         required:true
     },
     reason:{

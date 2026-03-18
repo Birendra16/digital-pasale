@@ -23,8 +23,9 @@ const PurchaseItemSchema = new mongoose.Schema({
 
 const PurchaseSchema = new mongoose.Schema({
     supplier: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Supplier",
+        required: true,
     },
     items: [PurchaseItemSchema],
     totalAmount: Number,

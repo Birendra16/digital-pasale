@@ -3,67 +3,71 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { toast } from "sonner"
-import CreateUnit from "./create-unit"
-import UnitsTable from "./units-table"
+import CreateSubUnit from "./create-subunit"
+import SubUnitsTable from "./subunits-table"
 
-interface Unit {
+interface SubUnit {
   _id: string
   name: string
-  shortName: string
+  symbol: string
+  isFractional: boolean
 }
 
-const Units = () => {
-  const [units, setUnits] = useState<Unit[]>([])
+const SubUnits = () => {
+  const [SubUnits, setSubUnits] = useState<Unit[]>([])
 
-  const fetchUnits = async () => {
+  const fetchSubUnits = async () => {
     try {
-      const { data } = await axios.get("http://localhost:8080/api/units")
-      setUnits(data.units)
+      const { data } = await axios.get("http://localhost:8080/api/SubUnits")
+      setSubUnits(data.SubUnits)
     } catch {
-      toast.error("Failed to load units")
+      toast.error("Failed to load SubUnits")
     }
   }
 
+  // Create Unit
   const createUnit = async (unitInfo: any) => {
     try {
-      await axios.post("http://localhost:8080/api/units", unitInfo)
+      await axios.post("http://localhost:8080/api/SubUnits", unitInfo)
       toast.success("Unit created successfully")
-      fetchUnits()
+      fetchSubUnits()
     } catch {
       toast.error("Failed to create unit")
     }
   }
 
+  // Edit Unit
   const editUnit = async (id: string, unitInfo: any) => {
     try {
-      await axios.put(`http://localhost:8080/api/units/${id}`, unitInfo)
+      await axios.put(`http://localhost:8080/api/SubUnits/${id}`, unitInfo)
       toast.success("Unit updated successfully")
-      fetchUnits()
+      fetchSubUnits()
     } catch {
       toast.error("Failed to update unit")
     }
   }
 
+  // Delete Unit
   const deleteUnit = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:8080/api/units/${id}`)
+      await axios.delete(`http://localhost:8080/api/SubUnits/${id}`)
       toast.success("Unit deleted successfully")
-      fetchUnits()
+      fetchSubUnits()
     } catch {
       toast.error("Failed to delete unit")
     }
   }
 
   useEffect(() => {
-    fetchUnits()
+    fetchSubUnits()
   }, [])
 
   return (
     <div className="space-y-4">
       <CreateUnit createUnit={createUnit} />
 
-      <UnitsTable
-        units={units}
+      <SubUnitsTable
+        SubUnits={SubUnits} 
         editUnit={editUnit}
         deleteUnit={deleteUnit}
       />
@@ -71,4 +75,4 @@ const Units = () => {
   )
 }
 
-export default Units
+export default SubUnits

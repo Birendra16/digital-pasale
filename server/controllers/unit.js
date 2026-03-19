@@ -1,52 +1,105 @@
 import Unit from "../models/unit.js";
 
-const createUnit = async (req, res) => {
+/**
+ * Create a new unit
+ */
+export const createUnit = async (req, res) => {
   try {
-    const unit = await Unit.create(req.body);
-    res.status(201).json({ message: "Unit created", unit });
+    const { name, shortName } = req.body;
+
+    if (!name || !shortName) {
+      return res.status(400).json({ message: "Name and shortName are required" });
+    }
+
+    // Check uniqueness
+    const existing = await Unit.findOne({ name: name.trim() });
+    if (existing) {
+      return res.status(400).json({ message: "Unit with this name already exists" });
+    }
+
+    const unit = new Unit({
+      name: name.trim(),
+      shortName: shortName.trim(),
+    });
+
+    await unit.save();
+
+    res.status(201).json({ message: "Unit created successfully", unit });
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-const getUnits = async (req, res) => {
+/**
+ * Get all units
+ */
+export const getUnits = async (req, res) => {
   try {
-    const units = await Unit.find({}).sort({ name: 1 });
-    res.status(200).json({ message: "Units retrieved", units });
+    const units = await Unit.find().sort({ name: 1 });
+    res.json({ units });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-
-const getUnit = async (req, res) => {
+/**
+ * Update a unit
+ */
+export const updateUnit = async (req, res) => {
   try {
-    const unit = await Unit.findById(req.params.id);
-    if (!unit) return res.status(404).json({ message: "Unit not found" });
-    res.status(200).json({ message: "Unit retrieved", unit });
+    const { id } = req.params;
+    const { name, shortName } = req.body;
+
+    if (!name || !shortName) {
+      return res.status(400).json({ message: "Name and shortName are required" });
+    }
+
+    const unit = await Unit.findById(id);
+    if (!unit) {
+      return res.status(404).json({ message: "Unit not found" });
+    }
+
+    // Check uniqueness if name changed
+    if (unit.name !== name.trim()) {
+      const exists = await Unit.findOne({ name: name.trim() });
+      if (exists) {
+        return res.status(400).json({ message: "Another unit with this name already exists" });
+      }
+    }
+
+    unit.name = name.trim();
+    unit.shortName = shortName.trim();
+
+    await unit.save();
+
+    res.json({ message: "Unit updated successfully", unit });
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-
-const updateUnit = async (req, res) => {
+/**
+ * Delete a unit
+ */
+export const deleteUnit = async (req, res) => {
   try {
-    const unit = await Unit.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.status(200).json({ message: "Unit updated", unit });
+    const { id } = req.params;
+
+    const unit = await Unit.findById(id);
+    if (!unit) {
+      return res.status(404).json({ message: "Unit not found" });
+    }
+
+    await unit.deleteOne();
+
+    res.json({ message: "Unit deleted successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
-
-const deleteUnit = async (req, res) => {
-  try {
-    await Unit.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Unit deleted" });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-};
-
-export { createUnit, getUnits, getUnit, updateUnit, deleteUnit };

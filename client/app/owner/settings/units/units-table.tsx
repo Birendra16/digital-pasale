@@ -33,32 +33,25 @@ import DeleteUnit from "./delete-unit"
 interface Unit {
   _id: string
   name: string
-  symbol: string
-  isFractional: boolean
+  shortName: string
 }
 
 interface UnitsTableProps {
   units: Unit[]
-  editUnit: (id: string, data: any) => Promise<void> 
-  deleteUnit: (id: string) => Promise<void> 
+  editUnit: (id: string, data: any) => Promise<void>
+  deleteUnit: (id: string) => Promise<void>
 }
 
 const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
 
-  
   const columns: ColumnDef<Unit>[] = [
     {
       accessorKey: "name",
       header: "Name",
     },
     {
-      accessorKey: "symbol",
-      header: "Symbol",
-    },
-    {
-      accessorKey: "isFractional",
-      header: "Fractional",
-      cell: ({ getValue }) => (getValue() ? "Yes" : "No"),
+      accessorKey: "shortName",
+      header: "Short Name",
     },
     {
       id: "actions",
@@ -78,9 +71,7 @@ const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              
               <EditUnit unit={unit} editUnit={editUnit} />
-
               <DeleteUnit id={unit._id} deleteUnit={deleteUnit} />
 
             </DropdownMenuContent>
@@ -104,10 +95,7 @@ const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}>
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
+                  {flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
             </TableRow>
@@ -120,10 +108,7 @@ const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
               </TableRow>

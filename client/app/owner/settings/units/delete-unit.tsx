@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog"
+import { toast } from "sonner"
 
 interface Props {
   id: string
@@ -20,41 +20,50 @@ interface Props {
 export default function DeleteUnit({ id, deleteUnit }: Props) {
 
   const handleDelete = async () => {
-    await deleteUnit(id)
+    try {
+      await deleteUnit(id)
+      toast.success("Unit deleted successfully")
+    } catch {
+      toast.error("Failed to delete unit")
+    }
   }
 
   return (
     <Dialog>
+
+      {/* Trigger button inside dropdown */}
       <DialogTrigger asChild>
-        <Button variant="ghost" className="text-red-500">
+        <Button variant="ghost" className="text-red-500 w-full justify-start">
           Delete
         </Button>
       </DialogTrigger>
 
       <DialogContent>
+
         <DialogHeader>
           <DialogTitle>Delete Unit</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete this unit?
-          </DialogDescription>
         </DialogHeader>
 
+        <div>
+          Are you sure you want to delete this unit?
+        </div>
+
         <DialogFooter>
+
           <DialogClose asChild>
-            <Button variant="outline">
-              Cancel
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+
+          <DialogClose asChild>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
             </Button>
           </DialogClose>
 
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-          >
-            Delete
-          </Button>
-
         </DialogFooter>
+
       </DialogContent>
+
     </Dialog>
   )
 }

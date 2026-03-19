@@ -1,20 +1,29 @@
 import mongoose from "mongoose";
+
 const UnitSchema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:true,
-        unique:true
+    name: {
+        type: String,
+        required: true,
+        unique: true, // "Carton", "Bottle"
+        trim: true
     },
-    symbol:{
-        type:String,
-        required:true,
+
+    shortName: {
+        type: String, // "ctn", "btl", "kg"
+        required: true
     },
-    isFractional:{
-        type:Boolean,
-        default:false,
-    }
-}, {timestamps:true}
-);
+
+    // type: {
+    //     type: String,
+    //     enum: ["bigger", "smaller", "base"],
+    //     required: true
+    // },
+
+    // description: {
+    //     type: String
+    // }
+
+}, { timestamps: true });
 
 const Unit = mongoose.model("Unit", UnitSchema);
 export default Unit;

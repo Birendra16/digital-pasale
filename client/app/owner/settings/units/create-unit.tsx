@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -14,12 +13,14 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select"
 import { toast } from "sonner"
 
 interface CreateUnitPayload {
   name: string
-  symbol: string
-  isFractional: boolean
+  shortName: string
+  type: "bigger" | "smaller" | "base"
+  description?: string
 }
 
 interface CreateUnitProps {
@@ -28,22 +29,24 @@ interface CreateUnitProps {
 
 export default function CreateUnit({ createUnit }: CreateUnitProps) {
   const [name, setName] = useState("")
-  const [symbol, setSymbol] = useState("")
-  const [isFractional, setIsFractional] = useState(false)
+  const [shortName, setShortName] = useState("")
+  const [type, setType] = useState<"bigger" | "smaller" | "base">("base")
+  const [description, setDescription] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [open, setOpen] = useState(false)
 
   const resetForm = () => {
     setName("")
-    setSymbol("")
-    setIsFractional(false)
+    setShortName("")
+    setType("base")
+    setDescription("")
   }
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!name || !symbol) {
-      toast.error("Name and symbol are required")
+    if (!name || !shortName || !type) {
+      toast.error("Name, symbol, and type are required")
       return
     }
 
@@ -52,40 +55,43 @@ export default function CreateUnit({ createUnit }: CreateUnitProps) {
 
       await createUnit({
         name,
-        symbol,
-        isFractional,
+        shortName,
+        type,
+        description: description || undefined,
       })
 
+      toast.success("Unit created successfully")
       resetForm()
       setOpen(false)
-    } catch {
-      // error handled in parent
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to create unit")
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <Dialog 
-      open= {open}
-      onOpenChange={(value)=>{
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
         setOpen(value)
-        if(!value) resetForm()
-      }}>
+        if (!value) resetForm()
+      }}
+    >
       <DialogTrigger asChild>
-        <Button onClick={()=>setOpen(true)}>Add Unit</Button>
+        <Button>Add Unit</Button>
       </DialogTrigger>
 
       <DialogContent>
         <form onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle>Add Unit</DialogTitle>
-            <DialogDescription>
-              Create a new measurement unit
-            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
+
+            {/* Name */}
             <div className="flex flex-col gap-1">
               <Label>Unit Name</Label>
               <Input
@@ -96,24 +102,41 @@ export default function CreateUnit({ createUnit }: CreateUnitProps) {
               />
             </div>
 
+            {/* Short Name / Symbol */}
             <div className="flex flex-col gap-1">
               <Label>Symbol</Label>
               <Input
                 placeholder="kg"
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
+                value={shortName}
+                onChange={(e) => setShortName(e.target.value)}
                 required
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={isFractional}
-                onChange={(e) => setIsFractional(e.target.checked)}
+            {/* Type */}
+            {/* <div>
+              <Label>Type</Label>
+              <Select value={type} onValueChange={(v) => setType(v as "bigger" | "smaller" | "base")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="base">Base</SelectItem>
+                  <SelectItem value="bigger">Bigger Unit</SelectItem>
+                  <SelectItem value="smaller">Smaller Unit</SelectItem>
+                </SelectContent>
+              </Select>
+            </div> */}
+
+            {/* Optional Description */}
+            {/* <div className="flex flex-col gap-1">
+              <Label>Description (Optional)</Label>
+              <Input
+                placeholder="E.g., used for liquids"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
-              <Label>Allow Fractional Quantity</Label>
-            </div>
+            </div> */}
           </div>
 
           <DialogFooter className="mt-4">

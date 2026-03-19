@@ -12,7 +12,13 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select"
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from "@/components/ui/select"
 import axios from "axios"
 import { toast } from "sonner"
 
@@ -23,65 +29,103 @@ interface CreatePurchaseProps {
 export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [products, setProducts] = useState<any[]>([])
-  const [units, setUnits] = useState<any[]>([])
-  const [suppliers, setSuppliers] = useState<any[]>([])
 
-  const [product, setProduct] = useState("")
-  const [unit, setUnit] = useState("")
-  const [supplier, setSupplier] = useState("")
-  const [quantity, setQuantity] = useState("")
-  const [costPrice, setCostPrice] = useState("")
+  const [units, setUnits] = useState<any[]>([])
+
+  // 🔥 New states (based on schema)
+  const [productName, setProductName] = useState("")
+  const [supplierName, setSupplierName] = useState("")
+  const [buyingUnit, setBuyingUnit] = useState("")
+  const [subUnit, setSubUnit] = useState("")
+  const [unitCapacity, setUnitCapacity] = useState("")
+  const [buyingQuantity, setBuyingQuantity] = useState("")
+  const [costPricePerUnit, setCostPricePerUnit] = useState("")
 
   const resetForm = () => {
-    setProduct("")
-    setUnit("")
-    setSupplier("")
-    setQuantity("")
-    setCostPrice("")
+    setProductName("")
+    setSupplierName("")
+    setBuyingUnit("")
+    setSubUnit("")
+    setUnitCapacity("")
+    setBuyingQuantity("")
+    setCostPricePerUnit("")
   }
 
   useEffect(() => {
-    const fetchData = async () => {
-      const p = await axios.get("http://localhost:8080/api/products")
-      setProducts(p.data.products)
-      const u = await axios.get("http://localhost:8080/api/units")
-      setUnits(u.data.units)
-      const s = await axios.get("http://localhost:8080/api/suppliers")
-      setSuppliers(s.data.suppliers)
+    const fetchUnits = async () => {
+      const res = await axios.get("http://localhost:8080/api/units")
+      setUnits(res.data.units)
     }
-    fetchData()
+    fetchUnits()
   }, [])
 
   const handleSubmit = async () => {
-    const qty = Number(quantity)
-    const cp = Number(costPrice)
-    if (!product || !unit || !supplier || qty <= 0 || cp <= 0) {
-      toast.error("Enter valid positive values")
+    const qty = Number(buyingQuantity)
+    const cap = Number(unitCapacity)
+    const cost = Number(costPricePerUnit)
+
+    if (
+      !productName ||
+      !supplierName ||
+      !buyingUnit ||
+      !subUnit ||
+      qty <= 0 ||
+      cap <= 0 ||
+      cost <= 0
+    ) {
+      toast.error("Please enter valid values")
+      return
+    }
+
+    if (buyingUnit === subUnit) {
+      toast.error("Buying unit and subunit cannot be same")
       return
     }
 
     try {
       setSubmitting(true)
+
       await axios.post("http://localhost:8080/api/purchases", {
-        supplier,
-        items: [{ product, unit, quantity: qty, costPrice: cp }]
+        supplierName,
+        items: [
+          {
+            productName,
+            buyingUnit,
+            subUnit,
+            unitCapacity: cap,
+            buyingQuantity: qty,
+            costPricePerUnit: cost,
+          },
+        ],
       })
+
       toast.success("Purchase created")
       resetForm()
       setOpen(false)
       onCreated && onCreated()
-    } catch {
+    } catch (err) {
+      console.error(err)
       toast.error("Failed to create purchase")
     } finally {
       setSubmitting(false)
     }
   }
 
-  const estimatedTotal = Number(quantity) * Number(costPrice) || 0
+  // 🔥 Live calculation
+  const totalSubUnits =
+    Number(buyingQuantity) * Number(unitCapacity) || 0
+
+  const estimatedTotal =
+    Number(buyingQuantity) * Number(costPricePerUnit) || 0
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if(!v) resetForm() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v)
+        if (!v) resetForm()
+      }}
+    >
       <DialogTrigger asChild>
         <Button>Add Purchase</Button>
       </DialogTrigger>
@@ -92,55 +136,111 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
         </DialogHeader>
 
         <div className="space-y-3">
+
+          {/* Supplier */}
           <div>
-            <Label>Product</Label>
-            <Select value={product} onValueChange={setProduct}>
-              <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
+            <Label>Supplier Name</Label>
+            <Input
+              value={supplierName}
+              onChange={(e) => setSupplierName(e.target.value)}
+            />
+          </div>
+
+          {/* Product */}
+          <div>
+            <Label>Product Name</Label>
+            <Input
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+            />
+          </div>
+
+          {/* Buying Unit */}
+          <div>
+            <Label>Buying Unit</Label>
+            <Select value={buyingUnit} onValueChange={setBuyingUnit}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select buying unit" />
+              </SelectTrigger>
               <SelectContent>
-                {products.map(p => <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>)}
+                {units.map((u) => (
+                  <SelectItem key={u._id} value={u._id}>
+                    {u.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Sub Unit */}
           <div>
-            <Label>Unit</Label>
-            <Select value={unit} onValueChange={setUnit}>
-              <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
+            <Label>Sub Unit</Label>
+            <Select value={subUnit} onValueChange={setSubUnit}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select sub unit" />
+              </SelectTrigger>
               <SelectContent>
-                {units.map(u => <SelectItem key={u._id} value={u._id}>{u.name}</SelectItem>)}
+                {units.map((u) => (
+                  <SelectItem key={u._id} value={u._id}>
+                    {u.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Capacity */}
           <div>
-            <Label>Supplier</Label>
-            <Select value={supplier} onValueChange={setSupplier}>
-              <SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger>
-              <SelectContent>
-                {suppliers.map(s => <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <Label>1 Buying Unit = ? Sub Units</Label>
+            <Input
+              type="number"
+              value={unitCapacity}
+              onChange={(e) => setUnitCapacity(e.target.value)}
+            />
           </div>
 
+          {/* Quantity */}
           <div>
-            <Label>Quantity</Label>
-            <Input type="number" min={0} value={quantity} onChange={e => setQuantity(e.target.value)} />
+            <Label>Buying Quantity</Label>
+            <Input
+              type="number"
+              value={buyingQuantity}
+              onChange={(e) => setBuyingQuantity(e.target.value)}
+            />
           </div>
 
+          {/* Cost */}
           <div>
-            <Label>Cost Price</Label>
-            <Input type="number" min={0} value={costPrice} onChange={e => setCostPrice(e.target.value)} />
+            <Label>Cost Price (per Buying Unit)</Label>
+            <Input
+              type="number"
+              value={costPricePerUnit}
+              onChange={(e) => setCostPricePerUnit(e.target.value)}
+            />
           </div>
 
-          <div className="flex justify-between font-semibold">
-            <span>Estimated Total</span>
-            <span>{estimatedTotal}</span>
+          {/* 🔥 Live Preview */}
+          <div className="text-sm space-y-1 border-t pt-2">
+            <div className="flex justify-between">
+              <span>Total Sub Units</span>
+              <span>{totalSubUnits}</span>
+            </div>
+
+            <div className="flex justify-between font-semibold">
+              <span>Total Cost</span>
+              <span>Rs. {estimatedTotal}</span>
+            </div>
           </div>
+
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={submitting}>
+            {submitting ? "Saving..." : "Save"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

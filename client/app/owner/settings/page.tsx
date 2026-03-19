@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 
 const modules = [
   { name: "Units", path: "/owner/settings/units" },
+  { name: "SubUnits", path: "/owner/settings/subunits" },
   { name: "Categories", path: "/owner/settings/categories" },
   { name: "Brands", path: "/owner/settings/brands" },
   { name: "Taxes", path: "/owner/settings/taxes" },

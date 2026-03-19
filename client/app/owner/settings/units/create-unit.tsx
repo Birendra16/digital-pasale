@@ -59,13 +59,10 @@ export default function CreateUnit({ createUnit }: CreateUnitProps) {
         type,
         description: description || undefined,
       })
-
-      toast.success("Unit created successfully")
       resetForm()
       setOpen(false)
-    } catch (err) {
-      console.error(err)
-      toast.error("Failed to create unit")
+    } catch{
+
     } finally {
       setSubmitting(false)
     }

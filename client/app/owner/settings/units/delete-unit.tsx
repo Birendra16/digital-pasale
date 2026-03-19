@@ -22,9 +22,7 @@ export default function DeleteUnit({ id, deleteUnit }: Props) {
   const handleDelete = async () => {
     try {
       await deleteUnit(id)
-      toast.success("Unit deleted successfully")
     } catch {
-      toast.error("Failed to delete unit")
     }
   }
 

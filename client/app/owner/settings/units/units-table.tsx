@@ -38,11 +38,12 @@ interface Unit {
 
 interface UnitsTableProps {
   units: Unit[]
+  loading: boolean
   editUnit: (id: string, data: any) => Promise<void>
   deleteUnit: (id: string) => Promise<void>
 }
 
-const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
+const UnitsTable = ({ units, loading, editUnit, deleteUnit }: UnitsTableProps) => {
 
   const columns: ColumnDef<Unit>[] = [
     {
@@ -70,10 +71,10 @@ const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-
+                <div className="flex">
               <EditUnit unit={unit} editUnit={editUnit} />
               <DeleteUnit id={unit._id} deleteUnit={deleteUnit} />
-
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -82,7 +83,7 @@ const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
   ]
 
   const table = useReactTable({
-    data: units,
+    data: units || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
@@ -103,7 +104,19 @@ const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
         </TableHeader>
 
         <TableBody>
-          {table.getRowModel().rows.length ? (
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={3}>
+                <div className="flex justify-center p-4">Loading Units...</div>
+              </TableCell>
+            </TableRow>
+          ) : units.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={3} className="text-center">
+                No units found
+              </TableCell>
+            </TableRow>
+          ) : (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
@@ -113,12 +126,6 @@ const UnitsTable = ({ units, editUnit, deleteUnit }: UnitsTableProps) => {
                 ))}
               </TableRow>
             ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={3} className="text-center">
-                No units found
-              </TableCell>
-            </TableRow>
           )}
         </TableBody>
       </Table>

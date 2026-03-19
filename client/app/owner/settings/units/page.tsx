@@ -14,43 +14,51 @@ interface Unit {
 
 const Units = () => {
   const [units, setUnits] = useState<Unit[]>([])
+  const [loading, setLoading] = useState(true)
 
   const fetchUnits = async () => {
     try {
+      setLoading(true)
       const { data } = await axios.get("http://localhost:8080/api/units")
-      setUnits(data.units)
-    } catch {
-      toast.error("Failed to load units")
+      setUnits(data.units || [])
+    } catch(err:any) {
+      toast.error(err.response?.data?.message || "Failed to load units")
+      throw err;
+    } finally {
+      setLoading(false)
     }
   }
 
   const createUnit = async (unitInfo: any) => {
     try {
-      await axios.post("http://localhost:8080/api/units", unitInfo)
-      toast.success("Unit created successfully")
+      const res = await axios.post("http://localhost:8080/api/units", unitInfo)
+      toast.success(res.data.message)
       fetchUnits()
-    } catch {
-      toast.error("Failed to create unit")
+    } catch(err:any) {
+    toast.error(err.response?.data?.message || "Failed to create unit")
+        throw err;
     }
   }
 
   const editUnit = async (id: string, unitInfo: any) => {
     try {
-      await axios.put(`http://localhost:8080/api/units/${id}`, unitInfo)
-      toast.success("Unit updated successfully")
+      const res = await axios.put(`http://localhost:8080/api/units/${id}`, unitInfo)
+      toast.success(res.data.message)
       fetchUnits()
-    } catch {
-      toast.error("Failed to update unit")
+    } catch(err:any) {
+    toast.error(err.response?.data?.message || "Failed to update unit")
+    throw err;
     }
   }
 
   const deleteUnit = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:8080/api/units/${id}`)
-      toast.success("Unit deleted successfully")
+      const res = await axios.delete(`http://localhost:8080/api/units/${id}`)
+    toast.success(res.data.message)
       fetchUnits()
-    } catch {
-      toast.error("Failed to delete unit")
+    } catch (err:any){
+    toast.error(err.response?.data?.message || "Failed to delete unit")
+    throw err;
     }
   }
 
@@ -64,6 +72,7 @@ const Units = () => {
 
       <UnitsTable
         units={units}
+        loading={loading}
         editUnit={editUnit}
         deleteUnit={deleteUnit}
       />

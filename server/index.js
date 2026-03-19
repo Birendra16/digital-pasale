@@ -12,6 +12,7 @@ import unitRouter from "./routes/unit.js";
 import inventoryRouter from "./routes/inventory.js";
 import purchaseRouter from "./routes/purchase.js";
 import supplierRouter from "./routes/supplier.js";
+import subUnitRouter from "./routes/subunit.js";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/subscription", subscriptionRouter);
 app.use("/api/products", productRouter);
 app.use("/api/units", unitRouter);
+app.use("/api/subunits",subUnitRouter)
 app.use("/api/inventory", inventoryRouter);
 app.use("/api/purchases", purchaseRouter)
 app.use("/api/suppliers", supplierRouter)

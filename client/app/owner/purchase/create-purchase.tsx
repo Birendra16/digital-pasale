@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -26,222 +26,378 @@ interface CreatePurchaseProps {
   onCreated?: () => void
 }
 
+interface PurchaseItem {
+  productName: string
+  buyingUnit: string
+  subUnit: string
+  unitCapacity: string
+  buyingQuantity: string
+  costPricePerUnit: string
+}
+
 export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   const [units, setUnits] = useState<any[]>([])
+  const [subunits, setSubUnits] = useState<any[]>([])
+  const [suppliers, setSuppliers] = useState<any[]>([])
 
-  // 🔥 New states (based on schema)
-  const [productName, setProductName] = useState("")
-  const [supplierName, setSupplierName] = useState("")
-  const [buyingUnit, setBuyingUnit] = useState("")
-  const [subUnit, setSubUnit] = useState("")
-  const [unitCapacity, setUnitCapacity] = useState("")
-  const [buyingQuantity, setBuyingQuantity] = useState("")
-  const [costPricePerUnit, setCostPricePerUnit] = useState("")
+  const [loadingUnits, setLoadingUnits] = useState(true)
+  const [loadingSubUnits, setLoadingSubUnits] = useState(true)
+  const [loadingSuppliers, setLoadingSuppliers] = useState(true)
+
+  // ✅ Use supplierId instead of supplierName
+  const [supplierId, setSupplierId] = useState("")
+
+  const [items, setItems] = useState<PurchaseItem[]>([
+    {
+      productName: "",
+      buyingUnit: "",
+      subUnit: "",
+      unitCapacity: "",
+      buyingQuantity: "",
+      costPricePerUnit: "",
+    },
+  ])
+
+  const [activeIndex, setActiveIndex] = useState(0)
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const resetForm = () => {
-    setProductName("")
-    setSupplierName("")
-    setBuyingUnit("")
-    setSubUnit("")
-    setUnitCapacity("")
-    setBuyingQuantity("")
-    setCostPricePerUnit("")
+    setSupplierId("")
+    setItems([
+      {
+        productName: "",
+        buyingUnit: "",
+        subUnit: "",
+        unitCapacity: "",
+        buyingQuantity: "",
+        costPricePerUnit: "",
+      },
+    ])
+    setActiveIndex(0)
+  }
+
+  // ================= FETCH =================
+  const fetchSuppliers = async () => {
+    setLoadingSuppliers(true)
+    try {
+      const res = await axios.get("http://localhost:8080/api/suppliers")
+      setSuppliers(res.data.suppliers || [])
+    } catch {
+      toast.error("Failed to load suppliers")
+      setSuppliers([])
+    } finally {
+      setLoadingSuppliers(false)
+    }
+  }
+
+  const fetchUnits = async () => {
+    setLoadingUnits(true)
+    try {
+      const res = await axios.get("http://localhost:8080/api/units")
+      setUnits(res.data.units || [])
+    } catch {
+      toast.error("Failed to load units")
+      setUnits([])
+    } finally {
+      setLoadingUnits(false)
+    }
+  }
+
+  const fetchSubUnits = async () => {
+    setLoadingSubUnits(true)
+    try {
+      const res = await axios.get("http://localhost:8080/api/subunits")
+      setSubUnits(res.data.subUnits || [])
+    } catch {
+      toast.error("Failed to load subunits")
+      setSubUnits([])
+    } finally {
+      setLoadingSubUnits(false)
+    }
   }
 
   useEffect(() => {
-    const fetchUnits = async () => {
-      const res = await axios.get("http://localhost:8080/api/units")
-      setUnits(res.data.units)
-    }
+    fetchSuppliers()
     fetchUnits()
+    fetchSubUnits()
   }, [])
 
-  const handleSubmit = async () => {
-    const qty = Number(buyingQuantity)
-    const cap = Number(unitCapacity)
-    const cost = Number(costPricePerUnit)
+  // ================= ITEM HANDLERS =================
+  const updateItem = (index: number, field: keyof PurchaseItem, value: string) => {
+    const updated = [...items]
+    updated[index][field] = value
+    setItems(updated)
+  }
 
-    if (
-      !productName ||
-      !supplierName ||
-      !buyingUnit ||
-      !subUnit ||
-      qty <= 0 ||
-      cap <= 0 ||
-      cost <= 0
-    ) {
-      toast.error("Please enter valid values")
+  const addItem = () => {
+    const newItems = [
+      ...items,
+      {
+        productName: "",
+        buyingUnit: "",
+        subUnit: "",
+        unitCapacity: "",
+        buyingQuantity: "",
+        costPricePerUnit: "",
+      },
+    ]
+
+    setItems(newItems)
+    const newIndex = newItems.length - 1
+    setActiveIndex(newIndex)
+
+    setTimeout(() => {
+      inputRefs.current[newIndex]?.focus()
+      const itemElement = inputRefs.current[newIndex]?.closest("div.border")
+      itemElement?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+    }, 100)
+  }
+
+  const removeItem = (index: number) => {
+    if (items.length === 1) return
+    const updated = items.filter((_, i) => i !== index)
+
+    let newActiveIndex = activeIndex
+    if (index === activeIndex) {
+      newActiveIndex = index > 0 ? index - 1 : 0
+    } else if (index < activeIndex) {
+      newActiveIndex = activeIndex - 1
+    }
+
+    setItems(updated)
+    setActiveIndex(newActiveIndex)
+
+    setTimeout(() => {
+      inputRefs.current[newActiveIndex]?.focus()
+    }, 50)
+  }
+
+  // ================= CALC =================
+  const grandTotal = items.reduce(
+    (total, item) =>
+      total + (Number(item.buyingQuantity) || 0) * (Number(item.costPricePerUnit) || 0),
+    0
+  )
+
+  // ================= SUBMIT =================
+  const handleSubmit = async () => {
+    if (submitting) return
+    if (!supplierId || supplierId === "none") {
+      toast.error("Select supplier")
       return
     }
 
-    if (buyingUnit === subUnit) {
-      toast.error("Buying unit and subunit cannot be same")
-      return
+    for (const item of items) {
+      const qty = Number(item.buyingQuantity) || 0
+      const cap = Number(item.unitCapacity) || 0
+      const cost = Number(item.costPricePerUnit) || 0
+      if (
+        !item.productName ||
+        !item.buyingUnit ||
+        !item.subUnit ||
+        item.buyingUnit === item.subUnit ||
+        qty <= 0 ||
+        cap <= 0 ||
+        cost <= 0
+      ) {
+        toast.error("Fill all item fields correctly")
+        return
+      }
     }
 
     try {
       setSubmitting(true)
-
       await axios.post("http://localhost:8080/api/purchases", {
-        supplierName,
-        items: [
-          {
-            productName,
-            buyingUnit,
-            subUnit,
-            unitCapacity: cap,
-            buyingQuantity: qty,
-            costPricePerUnit: cost,
-          },
-        ],
+        supplierId,
+        items: items.map((item) => ({
+          productName: item.productName,
+          buyingUnit: item.buyingUnit,
+          subUnit: item.subUnit,
+          unitCapacity: Number(item.unitCapacity),
+          buyingQuantity: Number(item.buyingQuantity),
+          costPricePerUnit: Number(item.costPricePerUnit),
+        })),
       })
-
       toast.success("Purchase created")
       resetForm()
       setOpen(false)
       onCreated && onCreated()
-    } catch (err) {
-      console.error(err)
-      toast.error("Failed to create purchase")
+    } catch (error: any) {
+      console.error("CREATE PURCHASE FRONTEND ERROR:", error)
+      toast.error(error?.response?.data?.message || "Failed to create purchase")
     } finally {
       setSubmitting(false)
     }
   }
 
-  // 🔥 Live calculation
-  const totalSubUnits =
-    Number(buyingQuantity) * Number(unitCapacity) || 0
-
-  const estimatedTotal =
-    Number(buyingQuantity) * Number(costPricePerUnit) || 0
-
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        setOpen(v)
-        if (!v) resetForm()
-      }}
-    >
+    <Dialog open={open} onOpenChange={(v) => (!v ? resetForm() : setOpen(v))}>
       <DialogTrigger asChild>
         <Button>Add Purchase</Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Create Purchase</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
-
-          {/* Supplier */}
+        <div className="flex-1 overflow-y-auto space-y-3 pr-2">
           <div>
-            <Label>Supplier Name</Label>
-            <Input
-              value={supplierName}
-              onChange={(e) => setSupplierName(e.target.value)}
-            />
+            <Label>Supplier</Label>
+            {loadingSuppliers ? (
+              <div className="flex justify-center p-4">Loading...</div>
+            ) : (
+              <Select value={supplierId} onValueChange={setSupplierId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select supplier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {suppliers.map((s) => (
+                    <SelectItem key={s._id} value={s._id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
-          {/* Product */}
-          <div>
-            <Label>Product Name</Label>
-            <Input
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-            />
-          </div>
+          {items.map((item, index) => {
+            const isActive = index === activeIndex
+            const itemTotal = (Number(item.buyingQuantity) || 0) * (Number(item.costPricePerUnit) || 0)
 
-          {/* Buying Unit */}
-          <div>
-            <Label>Buying Unit</Label>
-            <Select value={buyingUnit} onValueChange={setBuyingUnit}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select buying unit" />
-              </SelectTrigger>
-              <SelectContent>
-                {units.map((u) => (
-                  <SelectItem key={u._id} value={u._id}>
-                    {u.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            return (
+              <div key={index} className="border rounded">
+                <div
+                  className={`flex justify-between items-center p-3 cursor-pointer transition ${
+                    isActive ? "bg-blue-50" : "bg-gray-50"
+                  }`}
+                  onClick={() => setActiveIndex(index)}
+                >
+                  <div>
+                    <p className="font-semibold">{item.productName || `Item ${index + 1}`}</p>
+                    {!isActive && (
+                      <p className="text-xs text-gray-500">
+                        Qty: {item.buyingQuantity || 0} × Rs. {item.costPricePerUnit || 0}
+                      </p>
+                    )}
+                  </div>
 
-          {/* Sub Unit */}
-          <div>
-            <Label>Sub Unit</Label>
-            <Select value={subUnit} onValueChange={setSubUnit}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select sub unit" />
-              </SelectTrigger>
-              <SelectContent>
-                {units.map((u) => (
-                  <SelectItem key={u._id} value={u._id}>
-                    {u.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">Rs. {itemTotal}</span>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removeItem(index)
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
 
-          {/* Capacity */}
-          <div>
-            <Label>1 Buying Unit = ? Sub Units</Label>
-            <Input
-              type="number"
-              value={unitCapacity}
-              onChange={(e) => setUnitCapacity(e.target.value)}
-            />
-          </div>
+                {isActive && (
+                  <div className="p-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <Input
+                      ref={(el) => (inputRefs.current[index] = el)}
+                      placeholder="Product Name"
+                      value={item.productName}
+                      onChange={(e) => updateItem(index, "productName", e.target.value)}
+                    />
 
-          {/* Quantity */}
-          <div>
-            <Label>Buying Quantity</Label>
-            <Input
-              type="number"
-              value={buyingQuantity}
-              onChange={(e) => setBuyingQuantity(e.target.value)}
-            />
-          </div>
+                    <Select
+                      value={item.buyingUnit}
+                      onValueChange={(v) => updateItem(index, "buyingUnit", v)}
+                      disabled={loadingUnits}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={loadingUnits ? "Loading units..." : "Buying Unit"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {units.map((u) => (
+                          <SelectItem key={u._id} value={u._id}>
+                            {u.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-          {/* Cost */}
-          <div>
-            <Label>Cost Price (per Buying Unit)</Label>
-            <Input
-              type="number"
-              value={costPricePerUnit}
-              onChange={(e) => setCostPricePerUnit(e.target.value)}
-            />
-          </div>
+                    <Select
+                      value={item.subUnit}
+                      onValueChange={(v) => updateItem(index, "subUnit", v)}
+                      disabled={loadingSubUnits}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={loadingSubUnits ? "Loading subunits..." : "Sub Unit"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subunits.map((su) => (
+                          <SelectItem key={su._id} value={su._id}>
+                            {su.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-          {/* 🔥 Live Preview */}
-          <div className="text-sm space-y-1 border-t pt-2">
-            <div className="flex justify-between">
-              <span>Total Sub Units</span>
-              <span>{totalSubUnits}</span>
-            </div>
+                    <Input
+                      type="number"
+                      placeholder="Buying Unit Capacity (1 buying unit = ? subunits)"
+                      value={item.unitCapacity}
+                      min={0}
+                      onChange={(e) => updateItem(index, "unitCapacity", e.target.value)}
+                    />
 
-            <div className="flex justify-between font-semibold">
-              <span>Total Cost</span>
-              <span>Rs. {estimatedTotal}</span>
-            </div>
-          </div>
+                    <Input
+                      type="number"
+                      placeholder="Quantity"
+                      value={item.buyingQuantity}
+                      min={0}
+                      onChange={(e) => updateItem(index, "buyingQuantity", e.target.value)}
+                    />
 
+                    <Input
+                      type="number"
+                      placeholder="Cost per Unit"
+                      value={item.costPricePerUnit}
+                      min={0}
+                      onChange={(e) => updateItem(index, "costPricePerUnit", e.target.value)}
+                    />
+
+                    <div className="flex justify-between text-sm font-medium">
+                      <span>Item Total</span>
+                      <span>Rs. {itemTotal}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+        <div className="border-t pt-3 space-y-3 bg-white">
+          <Button variant="outline" onClick={addItem} className="w-full">
+            + Add Another Item
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting ? "Saving..." : "Save"}
-          </Button>
-        </DialogFooter>
+
+          <div className="flex justify-between text-lg font-semibold">
+            <span>Grand Total</span>
+            <span>Rs. {grandTotal}</span>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={submitting}>
+              {submitting ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

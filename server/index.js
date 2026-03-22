@@ -13,10 +13,21 @@ import inventoryRouter from "./routes/inventory.js";
 import purchaseRouter from "./routes/purchase.js";
 import supplierRouter from "./routes/supplier.js";
 import subUnitRouter from "./routes/subunit.js";
+import { Server } from "socket.io";
+import http from "http";
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+
+export const io = new Server(server, {
+  cors: {
+    origin:"http://localhost:3000",
+    credentials: true,
+  }
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
@@ -35,7 +46,7 @@ app.use("/api/inventory", inventoryRouter);
 app.use("/api/purchases", purchaseRouter)
 app.use("/api/suppliers", supplierRouter)
 
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

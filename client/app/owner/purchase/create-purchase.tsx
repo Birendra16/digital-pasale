@@ -28,6 +28,7 @@ interface CreatePurchaseProps {
 
 interface PurchaseItem {
   productName: string
+  sku: string             // ✅ UPDATED: Added SKU field
   buyingUnit: string
   subUnit: string
   unitCapacity: string
@@ -47,12 +48,12 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   const [loadingSubUnits, setLoadingSubUnits] = useState(true)
   const [loadingSuppliers, setLoadingSuppliers] = useState(true)
 
-  // ✅ Use supplierId instead of supplierName
   const [supplierId, setSupplierId] = useState("")
 
   const [items, setItems] = useState<PurchaseItem[]>([
     {
       productName: "",
+      sku: "",                 // ✅ UPDATED: Initialize SKU
       buyingUnit: "",
       subUnit: "",
       unitCapacity: "",
@@ -69,6 +70,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
     setItems([
       {
         productName: "",
+        sku: "",               // ✅ UPDATED: Reset SKU
         buyingUnit: "",
         subUnit: "",
         unitCapacity: "",
@@ -128,6 +130,11 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   // ================= ITEM HANDLERS =================
   const updateItem = (index: number, field: keyof PurchaseItem, value: string) => {
     const updated = [...items]
+
+    if (field === "sku") {
+      value = value.toUpperCase().trim() // ✅ UPDATED: Normalize SKU
+    }
+
     updated[index][field] = value
     setItems(updated)
   }
@@ -137,6 +144,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
       ...items,
       {
         productName: "",
+        sku: "",               // ✅ UPDATED: SKU in new item
         buyingUnit: "",
         subUnit: "",
         unitCapacity: "",
@@ -190,22 +198,23 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
       return
     }
 
+    // ✅ DUPLICATE CHECK: prevent submission if any duplicate SKU
+    const skuSet = new Set<string>()
     for (const item of items) {
       const qty = Number(item.buyingQuantity) || 0
       const cap = Number(item.unitCapacity) || 0
       const cost = Number(item.costPricePerUnit) || 0
-      if (
-        !item.productName ||
-        !item.buyingUnit ||
-        !item.subUnit ||
-        item.buyingUnit === item.subUnit ||
-        qty <= 0 ||
-        cap <= 0 ||
-        cost <= 0
-      ) {
+
+      if (!item.productName || !item.sku || !item.buyingUnit || !item.subUnit || item.buyingUnit === item.subUnit || qty <= 0 || cap <= 0 || cost <= 0) {
         toast.error("Fill all item fields correctly")
         return
       }
+
+      if (skuSet.has(item.sku)) {
+        toast.error(`Duplicate SKU found: ${item.sku}`)
+        return
+      }
+      skuSet.add(item.sku)
     }
 
     try {
@@ -214,6 +223,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
         supplierId,
         items: items.map((item) => ({
           productName: item.productName,
+          sku: item.sku,           // ✅ UPDATED: Send SKU to backend
           buyingUnit: item.buyingUnit,
           subUnit: item.subUnit,
           unitCapacity: Number(item.unitCapacity),
@@ -269,6 +279,11 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
             const isActive = index === activeIndex
             const itemTotal = (Number(item.buyingQuantity) || 0) * (Number(item.costPricePerUnit) || 0)
 
+            // ✅ DUPLICATE CHECK: detect duplicate SKU in real-time
+            const skuDuplicate = item.sku
+              ? items.some((other, i) => i !== index && other.sku === item.sku)
+              : false
+
             return (
               <div key={index} className="border rounded">
                 <div
@@ -281,7 +296,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
                     <p className="font-semibold">{item.productName || `Item ${index + 1}`}</p>
                     {!isActive && (
                       <p className="text-xs text-gray-500">
-                        Qty: {item.buyingQuantity || 0} × Rs. {item.costPricePerUnit || 0}
+                        Qty: {item.buyingQuantity || 0} × Rs. {item.costPricePerUnit || 0} | SKU: {item.sku || "-"}
                       </p>
                     )}
                   </div>
@@ -309,6 +324,18 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
                       value={item.productName}
                       onChange={(e) => updateItem(index, "productName", e.target.value)}
                     />
+
+                    {/* ✅ UPDATED: SKU input with normalization */}
+                    <Input
+                      placeholder="SKU (e.g., OLV-ORG-1L)"
+                      value={item.sku}
+                      onChange={(e) => updateItem(index, "sku", e.target.value)}
+                    />
+
+                    {/* ✅ DUPLICATE CHECK: show warning */}
+                    {skuDuplicate && (
+                      <p className="text-red-500 text-sm">This SKU is already added in another item!</p>
+                    )}
 
                     <Select
                       value={item.buyingUnit}
@@ -393,7 +420,13 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={submitting}>
+            {/* ✅ DUPLICATE CHECK: disable Save if duplicate exists */}
+            <Button
+              onClick={handleSubmit}
+              disabled={
+                submitting || items.some(item => item.sku && items.filter(i => i.sku === item.sku).length > 1)
+              }
+            >
               {submitting ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>

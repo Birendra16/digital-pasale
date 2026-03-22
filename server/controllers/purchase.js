@@ -2,10 +2,11 @@ import Purchase from "../models/purchase.js"
 import Unit from "../models/unit.js"
 import SubUnit from "../models/subunit.js"
 import Supplier from "../models/supplier.js"
+import Inventory from "../models/inventory.js"
+import { io } from "../index.js"
 
-/**
- * Create Purchase
- */
+
+ // Create Purchase
 export const createPurchase = async (req, res) => {
   try {
     const { supplierId, items } = req.body
@@ -21,9 +22,23 @@ export const createPurchase = async (req, res) => {
       return res.status(400).json({ message: "Invalid supplier reference" })
     }
 
-    // Validate each item
+    // Duplicate Check : Track SKUs
+    const skuSet = new Set()
+
     for (let item of items) {
-      let { productName, buyingUnit, subUnit, unitCapacity, buyingQuantity, costPricePerUnit } = item
+      let { productName, sku, buyingUnit, subUnit, unitCapacity, buyingQuantity, costPricePerUnit } = item
+      sku = sku?.trim().toUpperCase()
+
+      if(!sku){
+        return res.status(400).json({message: "SKU is required for each item"})
+      }
+      
+      // Duplicate check
+      if(skuSet.has(sku)){
+        return res.status(400).json({message:`Duplicate SKU found: ${sku}`})
+      }
+      skuSet.add(sku)
+      item.sku = sku
 
       // Convert to numbers
       unitCapacity = Number(unitCapacity)
@@ -61,6 +76,37 @@ export const createPurchase = async (req, res) => {
 
     await purchase.save()
 
+    //Update Inventory Automatically
+    for(const item of items){
+      const { productName, sku, buyingUnit, subUnit, unitCapacity, buyingQuantity, costPricePerUnit } = item
+      let inventory = await Inventory.findOne({sku: sku})
+      const addedSubUnits = buyingQuantity * unitCapacity
+
+      if(inventory){
+        //update existing product
+        inventory.totalSubUnits += addedSubUnits;
+        inventory.totalBuyingUnits += buyingQuantity;
+        inventory.lastCostPrice = costPricePerUnit;
+        await inventory.save();
+      } else {
+        // create new inventory product
+        inventory = new Inventory({
+          productName,
+          sku,
+          buyingUnit,
+          subUnit,
+          unitCapacity,
+          totalSubUnits: addedSubUnits,
+          totalBuyingUnits: buyingQuantity,
+          lastCostPrice: costPricePerUnit,
+        })
+        await inventory.save()
+      }
+    }
+
+    // Emit WebSocket events for frontend real-time update
+    io.emit("inventoryUpdated")
+
     // Populate for response
     await purchase.populate("supplierId items.buyingUnit items.subUnit")
 
@@ -74,9 +120,9 @@ export const createPurchase = async (req, res) => {
   }
 }
 
-/**
- * Get All Purchases
- */
+
+ // Get All Purchases
+
 export const getPurchases = async (req, res) => {
   try {
     const purchases = await Purchase.find()
@@ -90,9 +136,9 @@ export const getPurchases = async (req, res) => {
   }
 }
 
-/**
- * Get Purchase By ID
- */
+
+ // Get Purchase By ID
+ 
 export const getPurchaseById = async (req, res) => {
   try {
     const { id } = req.params

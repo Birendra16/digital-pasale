@@ -6,7 +6,12 @@ const PurchaseItemSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-
+  sku:{
+    type: String,
+    required: true,
+    trim: true,
+    uppercase: true,
+  },
   buyingUnit: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Unit",

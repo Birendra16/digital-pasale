@@ -1,32 +1,44 @@
 import mongoose from "mongoose";
 
 const InventorySchema = new mongoose.Schema({
-    product:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Product",
-        required: true
+    productName:{
+        type: String,
+        required: true,
+        trim: true,
     },
-    unit:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Unit",
-        required:true
+    sku: {
+        type: String,
+        required: true,
+        unique: true,
+        uppercase: true,
+        trim: true,
     },
-    quantity:{
-        type:Number,
-        default:0,
-        min:0
-    },
-    damaged: {
-        type:Number,
-        default:0,
-    },
-    expiryDate:{
-        type:Date
-    },
-    lowStockThreshold:{
-        type:Number,
-        default:10,
-    }
+   buyingUnit:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Unit",
+    required: true,
+   },
+   subUnit:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"SubUnit",
+    required: true,
+   },
+   unitCapacity:{
+    type: Number,
+    required: true,
+   },
+   totalSubUnits:{
+    type: Number,
+    default: 0,
+   },
+   totalBuyingUnits:{
+    type: Number,
+    default: 0,
+   },
+   lastCostPrice: {
+    type: Number,
+    default: 0,
+   },
 }, {timestamps:true});
 
 const Inventory = mongoose.model("Inventory", InventorySchema);

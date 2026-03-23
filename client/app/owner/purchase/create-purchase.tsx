@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Fragment } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -28,7 +29,7 @@ interface CreatePurchaseProps {
 
 interface PurchaseItem {
   productName: string
-  sku: string             // ✅ UPDATED: Added SKU field
+  sku: string
   buyingUnit: string
   subUnit: string
   unitCapacity: string
@@ -49,11 +50,10 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   const [loadingSuppliers, setLoadingSuppliers] = useState(true)
 
   const [supplierId, setSupplierId] = useState("")
-
   const [items, setItems] = useState<PurchaseItem[]>([
     {
       productName: "",
-      sku: "",                 // ✅ UPDATED: Initialize SKU
+      sku: "",
       buyingUnit: "",
       subUnit: "",
       unitCapacity: "",
@@ -70,7 +70,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
     setItems([
       {
         productName: "",
-        sku: "",               // ✅ UPDATED: Reset SKU
+        sku: "",
         buyingUnit: "",
         subUnit: "",
         unitCapacity: "",
@@ -130,11 +130,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   // ================= ITEM HANDLERS =================
   const updateItem = (index: number, field: keyof PurchaseItem, value: string) => {
     const updated = [...items]
-
-    if (field === "sku") {
-      value = value.toUpperCase().trim() // ✅ UPDATED: Normalize SKU
-    }
-
+    if (field === "sku") value = value.toUpperCase().trim()
     updated[index][field] = value
     setItems(updated)
   }
@@ -144,7 +140,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
       ...items,
       {
         productName: "",
-        sku: "",               // ✅ UPDATED: SKU in new item
+        sku: "",
         buyingUnit: "",
         subUnit: "",
         unitCapacity: "",
@@ -152,7 +148,6 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
         costPricePerUnit: "",
       },
     ]
-
     setItems(newItems)
     const newIndex = newItems.length - 1
     setActiveIndex(newIndex)
@@ -167,17 +162,11 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   const removeItem = (index: number) => {
     if (items.length === 1) return
     const updated = items.filter((_, i) => i !== index)
-
     let newActiveIndex = activeIndex
-    if (index === activeIndex) {
-      newActiveIndex = index > 0 ? index - 1 : 0
-    } else if (index < activeIndex) {
-      newActiveIndex = activeIndex - 1
-    }
-
+    if (index === activeIndex) newActiveIndex = index > 0 ? index - 1 : 0
+    else if (index < activeIndex) newActiveIndex = activeIndex - 1
     setItems(updated)
     setActiveIndex(newActiveIndex)
-
     setTimeout(() => {
       inputRefs.current[newActiveIndex]?.focus()
     }, 50)
@@ -198,7 +187,6 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
       return
     }
 
-    // ✅ DUPLICATE CHECK: prevent submission if any duplicate SKU
     const skuSet = new Set<string>()
     for (const item of items) {
       const qty = Number(item.buyingQuantity) || 0
@@ -223,7 +211,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
         supplierId,
         items: items.map((item) => ({
           productName: item.productName,
-          sku: item.sku,           // ✅ UPDATED: Send SKU to backend
+          sku: item.sku,
           buyingUnit: item.buyingUnit,
           subUnit: item.subUnit,
           unitCapacity: Number(item.unitCapacity),
@@ -236,7 +224,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
       setOpen(false)
       onCreated && onCreated()
     } catch (error: any) {
-      console.error("CREATE PURCHASE FRONTEND ERROR:", error)
+      console.error("CREATE PURCHASE ERROR:", error)
       toast.error(error?.response?.data?.message || "Failed to create purchase")
     } finally {
       setSubmitting(false)
@@ -244,17 +232,29 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => (!v ? resetForm() : setOpen(v))}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => (!v ? resetForm() : setOpen(v))}
+    >
       <DialogTrigger asChild>
         <Button>Add Purchase</Button>
       </DialogTrigger>
 
-      <DialogContent className="h-[90vh] flex flex-col">
+      <DialogContent
+        className="h-[90vh] flex flex-col"
+        aria-describedby="create-purchase-dialog"
+      >
         <DialogHeader>
           <DialogTitle>Create Purchase</DialogTitle>
+          <DialogDescription>
+            Record incoming stock from suppliers.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+        <div
+          id="create-purchase-dialog"
+          className="flex-1 overflow-y-auto space-y-3 pr-2"
+        >
           <div>
             <Label>Supplier</Label>
             {loadingSuppliers ? (
@@ -277,9 +277,10 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
 
           {items.map((item, index) => {
             const isActive = index === activeIndex
-            const itemTotal = (Number(item.buyingQuantity) || 0) * (Number(item.costPricePerUnit) || 0)
+            const itemTotal =
+              (Number(item.buyingQuantity) || 0) *
+              (Number(item.costPricePerUnit) || 0)
 
-            // ✅ DUPLICATE CHECK: detect duplicate SKU in real-time
             const skuDuplicate = item.sku
               ? items.some((other, i) => i !== index && other.sku === item.sku)
               : false
@@ -293,10 +294,13 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
                   onClick={() => setActiveIndex(index)}
                 >
                   <div>
-                    <p className="font-semibold">{item.productName || `Item ${index + 1}`}</p>
+                    <p className="font-semibold">
+                      {item.productName || `Item ${index + 1}`}
+                    </p>
                     {!isActive && (
                       <p className="text-xs text-gray-500">
-                        Qty: {item.buyingQuantity || 0} × Rs. {item.costPricePerUnit || 0} | SKU: {item.sku || "-"}
+                        Qty: {item.buyingQuantity || 0} × Rs.{" "}
+                        {item.costPricePerUnit || 0} | SKU: {item.sku || "-"}
                       </p>
                     )}
                   </div>
@@ -322,19 +326,19 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
                       ref={(el) => (inputRefs.current[index] = el)}
                       placeholder="Product Name"
                       value={item.productName}
-                      onChange={(e) => updateItem(index, "productName", e.target.value)}
+                      onChange={(e) =>
+                        updateItem(index, "productName", e.target.value)
+                      }
                     />
-
-                    {/* ✅ UPDATED: SKU input with normalization */}
                     <Input
                       placeholder="SKU (e.g., OLV-ORG-1L)"
                       value={item.sku}
                       onChange={(e) => updateItem(index, "sku", e.target.value)}
                     />
-
-                    {/* ✅ DUPLICATE CHECK: show warning */}
                     {skuDuplicate && (
-                      <p className="text-red-500 text-sm">This SKU is already added in another item!</p>
+                      <p className="text-red-500 text-sm">
+                        This SKU is already added in another item!
+                      </p>
                     )}
 
                     <Select
@@ -343,7 +347,9 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
                       disabled={loadingUnits}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={loadingUnits ? "Loading units..." : "Buying Unit"} />
+                        <SelectValue
+                          placeholder={loadingUnits ? "Loading units..." : "Buying Unit"}
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {units.map((u) => (
@@ -360,7 +366,9 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
                       disabled={loadingSubUnits}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={loadingSubUnits ? "Loading subunits..." : "Sub Unit"} />
+                        <SelectValue
+                          placeholder={loadingSubUnits ? "Loading subunits..." : "Sub Unit"}
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {subunits.map((su) => (
@@ -373,12 +381,11 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
 
                     <Input
                       type="number"
-                      placeholder="Buying Unit Capacity (1 buying unit = ? subunits)"
+                      placeholder="Buying Unit Capacity"
                       value={item.unitCapacity}
                       min={0}
                       onChange={(e) => updateItem(index, "unitCapacity", e.target.value)}
                     />
-
                     <Input
                       type="number"
                       placeholder="Quantity"
@@ -386,13 +393,14 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
                       min={0}
                       onChange={(e) => updateItem(index, "buyingQuantity", e.target.value)}
                     />
-
                     <Input
                       type="number"
                       placeholder="Cost per Unit"
                       value={item.costPricePerUnit}
                       min={0}
-                      onChange={(e) => updateItem(index, "costPricePerUnit", e.target.value)}
+                      onChange={(e) =>
+                        updateItem(index, "costPricePerUnit", e.target.value)
+                      }
                     />
 
                     <div className="flex justify-between text-sm font-medium">
@@ -420,11 +428,15 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            {/* ✅ DUPLICATE CHECK: disable Save if duplicate exists */}
             <Button
               onClick={handleSubmit}
               disabled={
-                submitting || items.some(item => item.sku && items.filter(i => i.sku === item.sku).length > 1)
+                submitting ||
+                items.some(
+                  (item) =>
+                    item.sku &&
+                    items.filter((i) => i.sku === item.sku).length > 1
+                )
               }
             >
               {submitting ? "Saving..." : "Save"}

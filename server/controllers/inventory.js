@@ -6,13 +6,13 @@ import StockLog from "../models/stocklog.js";
 const getInventory = async (req, res) => {
     try {
         const inventory = await Inventory.find()
-            .populate("product")
-            .populate("unit")
+            .populate("buyingUnit")
+            .populate("subUnit")
             .sort({ createdAt: -1 });
 
         res.status(200).json({
             message: "Inventory retrieved successfully",
-            inventory
+            products: inventory
         });
     } catch (err) {
         res.status(500).json({

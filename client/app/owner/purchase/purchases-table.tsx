@@ -1,94 +1,108 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import axios from "axios"
-import { Button } from "@/components/ui/button"
-import CreatePurchase from "./create-purchase"
-import ViewPurchase from "./view-purchase"
+import React, { Fragment } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
-export default function PurchasesTable() {
-  const [purchases, setPurchases] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+interface PurchasesTableProps {
+  purchases: any[];
+  onRefresh?: () => void; // optional callback for refreshing
+}
 
-  const fetchPurchases = async () => {
-    try {
-      setLoading(true)
-      const res = await axios.get("http://localhost:8080/api/purchases")
-      setPurchases(res.data.purchases || [])
-    } catch (err) {
-      console.error("Failed to fetch purchases", err)
-    } finally {
-      setLoading(false)
-    }
-  }
+export default function PurchasesTable({ purchases, onRefresh }: PurchasesTableProps) {
+  const [expanded, setExpanded] = React.useState<string | null>(null);
 
-  useEffect(() => {
-    fetchPurchases()
-  }, [])
+  const toggleExpand = (id: string) => {
+    setExpanded(expanded === id ? null : id);
+  };
 
   return (
     <div className="space-y-4">
+      {/* Refresh Button */}
+      {onRefresh && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={onRefresh}>
+            Refresh
+          </Button>
+        </div>
+      )}
 
-      {/* Create Purchase */}
-      <CreatePurchase onCreated={fetchPurchases} />
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Supplier</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Total Amount</TableHead>
+            <TableHead>Items</TableHead>
+            <TableHead>Action</TableHead>
+          </TableRow>
+        </TableHeader>
 
-      {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-left">Supplier</th>
-              <th className="p-3 text-left">Date</th>
-              <th className="p-3 text-left">Items</th>
-              <th className="p-3 text-left">Total Amount</th>
-              <th className="p-3 text-left">Action</th>
-            </tr>
-          </thead>
+        <TableBody>
+          {purchases.map((p) => (
+            <Fragment key={p._id}>
+              {/* Main Row */}
+              <TableRow>
+                <TableCell>{p.supplierId?.name}</TableCell>
+                <TableCell>{new Date(p.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell className="font-medium">Rs. {p.totalAmount}</TableCell>
+                <TableCell>{p.items.length}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleExpand(p._id)}
+                  >
+                    {expanded === p._id ? "Hide" : "View"}
+                  </Button>
+                </TableCell>
+              </TableRow>
 
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={5} className="p-4 text-center">
-                  Loading...
-                </td>
-              </tr>
-            ) : purchases.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="p-4 text-center">
-                  No purchases found
-                </td>
-              </tr>
-            ) : (
-              purchases.map((p) => (
-                <tr key={p._id} className="border-t">
-
-                  {/* ✅ FIXED */}
-                  <td className="p-3">{p.supplierName}</td>
-
-                  <td className="p-3">
-                    {new Date(p.createdAt).toLocaleString()}
-                  </td>
-
-                  {/* 🔥 Show item count */}
-                  <td className="p-3">
-                    {p.items?.length || 0} items
-                  </td>
-
-                  {/* 🔥 Format currency */}
-                  <td className="p-3 font-medium">
-                    Rs. {p.totalAmount?.toLocaleString()}
-                  </td>
-
-                  <td className="p-3">
-                    <ViewPurchase id={p._id} />
-                  </td>
-
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              {/* Expanded Row */}
+              {expanded === p._id && (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <div className="border-l-4 border-blue-500 bg-gray-50 rounded-r-lg p-4 space-y-3">
+                      <h3 className="font-semibold">Items</h3>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Product</TableHead>
+                            <TableHead>SKU</TableHead>
+                            <TableHead>Qty</TableHead>
+                            <TableHead>Capacity</TableHead>
+                            <TableHead>Cost</TableHead>
+                            <TableHead>Total</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {p.items.map((item: any, i: number) => (
+                            <TableRow key={i}>
+                              <TableCell>{item.productName}</TableCell>
+                              <TableCell>{item.sku}</TableCell>
+                              <TableCell>{item.buyingQuantity}</TableCell>
+                              <TableCell>{item.unitCapacity}</TableCell>
+                              <TableCell>Rs. {item.costPricePerUnit}</TableCell>
+                              <TableCell>Rs. {item.totalCost}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </Fragment>
+          ))}
+        </TableBody>
+      </Table>
     </div>
-  )
+  );
 }

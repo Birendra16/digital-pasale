@@ -1,4 +1,8 @@
-import { BarChart3, Boxes, Building2, FileBarChart, Home, Package, Settings, ShoppingBasketIcon, UserCog, Users } from "lucide-react"
+"use client"
+
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { BarChart3, Boxes, Building2, Home, Package, Settings, ShoppingBasketIcon, Users } from "lucide-react"
 
 import {
   Sidebar,
@@ -56,6 +60,14 @@ const items = [
 ]
 
 export function AppSidebar() {
+  // Render after mount to avoid server/client markup mismatch in sidebar tree.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -66,10 +78,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

@@ -47,6 +47,6 @@ app.use("/api/purchases", purchaseRouter)
 app.use("/api/suppliers", supplierRouter)
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

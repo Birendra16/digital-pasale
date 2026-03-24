@@ -16,7 +16,7 @@ export default function PurchasesPage() {
   const [date, setDate] = useState("")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [limit, setLimit] = useState(10)
+  const [limit, setLimit] = useState(5)
   const searchTimeout = useRef<NodeJS.Timeout | null>(null)
 
   // Debounce search

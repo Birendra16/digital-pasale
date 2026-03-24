@@ -125,7 +125,7 @@ export const createPurchase = async (req, res) => {
 
 export const getPurchases = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "", date = "" } = req.query;
+    const { page = 1, limit = 5, search = "", date = "" } = req.query;
 
     let query = {};
 

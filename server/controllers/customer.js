@@ -31,7 +31,7 @@ export const createCustomer = async (req, res) => {
 // Get All Customers (with search + pagination)
 export const getCustomers = async (req, res) => {
   try {
-    const { search = "", page = 1, limit = 10 } = req.query;
+    const { search = "", page = 1, limit = 5 } = req.query;
 
     const query = {
       isActive: true,

@@ -152,7 +152,7 @@ export const createBulkSales = async (req, res) => {
 // GET ALL SALES
 export const getSales = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "" } = req.query;
+    const { page = 1, limit = 5, search = "" } = req.query;
 
     let query = {};
 

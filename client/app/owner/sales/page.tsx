@@ -15,7 +15,7 @@ export default function SalesPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [limit, setLimit] = useState(10)
+  const [limit, setLimit] = useState(5)
   const searchTimeout = useRef<NodeJS.Timeout | null>(null)
 
   // Debounce search

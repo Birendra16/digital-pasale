@@ -125,11 +125,58 @@ export const createPurchase = async (req, res) => {
 
 export const getPurchases = async (req, res) => {
   try {
-    const purchases = await Purchase.find()
+    const { page = 1, limit = 10, search = "", date = "" } = req.query;
+
+    let query = {};
+
+    // 1. Search by supplier name or phone
+    if (search) {
+      const matchingSuppliers = await Supplier.find({
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } }
+        ]
+      }).select("_id");
+
+      const supplierIds = matchingSuppliers.map(s => s._id);
+
+      query = {
+        $or: [
+          { supplierId: { $in: supplierIds } },
+          { "items.productName": { $regex: search, $options: "i" } },
+          { "items.sku": { $regex: search, $options: "i" } }
+        ]
+      };
+    }
+
+    // 2. Search by Date (if provided)
+    if (date) {
+      // date is expected in YYYY-MM-DD
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+
+      query.createdAt = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    }
+
+    const purchases = await Purchase.find(query)
       .sort({ createdAt: -1 })
       .populate("supplierId items.buyingUnit items.subUnit")
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
 
-    res.json({ purchases })
+    const total = await Purchase.countDocuments(query);
+
+    res.json({ 
+      purchases,
+      total,
+      page: Number(page),
+      totalPages: Math.ceil(total / limit)
+    });
   } catch (error) {
     console.error("GET PURCHASES ERROR:", error)
     res.status(500).json({ message: "Server error", error: error.message })

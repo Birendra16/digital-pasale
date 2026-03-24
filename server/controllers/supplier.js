@@ -14,12 +14,38 @@ const createSupplier = async(req, res)=>{
 
 const getSuppliers = async (req, res)=>{
     try{
-        const suppliers = await Supplier.find({}).sort({name:1});
-        res.status(200).json({message:"Suppliers Retrieved", suppliers});
+        const { page = 1, limit = 10, search = "" } = req.query;
+
+        let query = {};
+
+        if (search) {
+          query = {
+            $or: [
+              { name: { $regex: search, $options: "i" } },
+              { phone: { $regex: search, $options: "i" } },
+              { email: { $regex: search, $options: "i" } },
+              { address: { $regex: search, $options: "i" } }
+            ]
+          };
+        }
+
+        const suppliers = await Supplier.find(query)
+          .sort({ name: 1 })
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+
+        const total = await Supplier.countDocuments(query);
+
+        res.status(200).json({
+          message: "Suppliers Retrieved", 
+          suppliers,
+          total,
+          page: Number(page),
+          totalPages: Math.ceil(total / limit)
+        });
     }
     catch(err){
         res.status(500).json({message:"Server Error", error:err.message})
-
     }
 }
 

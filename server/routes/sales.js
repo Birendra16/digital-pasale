@@ -1,0 +1,14 @@
+import express from "express";
+import {
+  getSales,
+  getSaleById,
+  createBulkSales,
+} from "../controllers/sales.js";
+
+const salesRouter = express.Router();
+
+salesRouter.post("/", createBulkSales);
+salesRouter.get("/", getSales);
+salesRouter.get("/:id", getSaleById);
+
+export default salesRouter;

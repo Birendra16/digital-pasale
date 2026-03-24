@@ -16,6 +16,7 @@ import subUnitRouter from "./routes/subunit.js";
 import { Server } from "socket.io";
 import http from "http";
 import customerRouter from "./routes/customer.js";
+import salesRouter from "./routes/sales.js";
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use("/api/inventory", inventoryRouter);
 app.use("/api/purchases", purchaseRouter)
 app.use("/api/suppliers", supplierRouter)
 app.use("/api/customers", customerRouter)
+app.use("/api/sales", salesRouter);
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {

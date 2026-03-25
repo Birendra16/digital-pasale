@@ -1,9 +1,6 @@
-import React from 'react'
+import React from "react";
+import OwnerDashboard from "./OwnerDashboard";
 
-const Dashboard = () => {
-  return (
-    <div>Dashboard</div>
-  )
+export default function Page() {
+  return <OwnerDashboard />;
 }
-
-export default Dashboard

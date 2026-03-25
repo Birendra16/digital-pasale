@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 
@@ -40,6 +41,9 @@ export default function DeleteUnit({ id, deleteUnit }: Props) {
 
         <DialogHeader>
           <DialogTitle>Delete Unit</DialogTitle>
+          <DialogDescription>
+            This action will permanently delete the unit.        
+            </DialogDescription>
         </DialogHeader>
 
         <div>

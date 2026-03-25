@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -56,6 +57,9 @@ export default function EditSubUnit({ subUnit, editSubUnit }: EditSubUnitProps) 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit SubUnit</DialogTitle>
+          <DialogDescription>
+            Update the fields below to modify subunit details.
+            </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">

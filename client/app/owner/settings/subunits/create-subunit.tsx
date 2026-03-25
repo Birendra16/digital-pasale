@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -66,6 +67,9 @@ export default function CreateSubUnit({ createSubUnit }: CreateSubUnitProps) {
         <form onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle>Add SubUnit</DialogTitle>
+            <DialogDescription>
+              Fill out the form below to add a new subunits.
+              </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">

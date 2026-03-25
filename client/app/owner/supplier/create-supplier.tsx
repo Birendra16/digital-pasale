@@ -1,18 +1,21 @@
-import { useState } from "react";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
+"use client"
+
+import { useState } from "react"
+import axios from "axios"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
-import SupplierForm from "./supplier-form";
+} from "@/components/ui/dialog"
+import { toast } from "sonner"
+import SupplierForm from "./supplier-form"
 
 const CreateSupplier = ({ fetchSuppliers }: any) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   const initialValues = {
     name: "",
@@ -20,37 +23,33 @@ const CreateSupplier = ({ fetchSuppliers }: any) => {
     email: "",
     address: "",
     taxNumber: "",
-  };
+  }
 
-  const createSupplier = async (supplierInfo) => {
-  try {
+  const createSupplier = async (supplierInfo: any) => {
     const { data } = await axios.post(
       "http://localhost:8080/api/suppliers",
       supplierInfo
-    );
-    return data;
-  } catch (err) {
-    throw err; 
+    )
+    return data
   }
-};
 
   const handleSubmit = async (values: any, { resetForm, setSubmitting }: any) => {
-  try {
-    const data = await createSupplier(values);
+    try {
+      setSubmitting(true)
+      const data = await createSupplier(values)
 
-    toast.success(data.message || "Supplier created successfully");
+      toast.success(data.message || "Supplier created successfully")
 
-    await fetchSuppliers();
-    resetForm();
-    setOpen(false);
-  } catch (err: any) {
-    toast.error(
-      err.response?.data?.message || "Failed to create supplier"
-    );
-  } finally {
-    setSubmitting(false); 
+      // Wait for table refresh before closing/resetting form
+      await fetchSuppliers()
+      resetForm()
+      setOpen(false)
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to create supplier")
+    } finally {
+      setSubmitting(false)
+    }
   }
-};
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -61,15 +60,15 @@ const CreateSupplier = ({ fetchSuppliers }: any) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Supplier</DialogTitle>
+          <DialogDescription>
+           Fill out the form below to add a new supplier.
+        </DialogDescription>
         </DialogHeader>
 
-        <SupplierForm
-          initialValues={initialValues}
-          onSubmit={handleSubmit}
-        />
+        <SupplierForm initialValues={initialValues} onSubmit={handleSubmit} />
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default CreateSupplier;
+export default CreateSupplier

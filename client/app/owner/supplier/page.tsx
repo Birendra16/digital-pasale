@@ -1,18 +1,27 @@
 "use client"
 
+import { useState, useEffect, useRef } from "react"
 import axios from "axios"
-import { useEffect, useState, useRef } from "react"
 import { toast } from "sonner"
 
 import CreateSupplier from "./create-supplier"
-import SuppliersTable from "./suppliers-table" 
+import SuppliersTable from "./suppliers-table"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 
-const Suppliers = () => {
-  const [suppliers, setSuppliers] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+interface Supplier {
+  _id: string
+  name: string
+  phone?: string
+  email?: string
+  address?: string
+  taxNumber?: string
+}
+
+export default function SuppliersPage() {
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [page, setPage] = useState(1)
@@ -32,22 +41,19 @@ const Suppliers = () => {
     }
   }, [search])
 
+  // Fetch suppliers from backend
   const fetchSuppliers = async () => {
-    setIsLoading(true)
     try {
-      const { data } = await axios.get(
-        "http://localhost:8080/api/suppliers", {
-          params: { search: debouncedSearch, page, limit }
-        }
-      )
-      setSuppliers(data.suppliers)
-      setTotalPages(data.totalPages || 1)
+      setLoading(true)
+      const res = await axios.get("http://localhost:8080/api/suppliers", {
+        params: { search: debouncedSearch, page, limit },
+      })
+      setSuppliers(res.data.suppliers || [])
+      setTotalPages(res.data.totalPages || 1)
     } catch (err: any) {
-      toast.error(
-        err.response?.data?.message || "Failed to fetch suppliers"
-      )
+      toast.error(err.response?.data?.message || "Failed to fetch suppliers")
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
@@ -56,24 +62,20 @@ const Suppliers = () => {
   }, [page, debouncedSearch, limit])
 
   return (
-    <div className="p-4 space-y-4"> {/* ✅ IMPROVED spacing */}
-      
-      {/* 🔹 Header */}
+    <div className="space-y-4 p-2 md:p-4">
+      {/* Top Controls */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
-        <h1 className="text-xl font-semibold">Suppliers</h1>
+        <CreateSupplier fetchSuppliers={fetchSuppliers} />
 
-        <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto mt-2 md:mt-0">
+        <div className="flex flex-col md:flex-row gap-4 items-center">
           <Input
-            placeholder="Search by name, phone, email..."
+            placeholder="Search by name, phone or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full md:w-64"
+            className="max-w-sm w-full md:w-sm"
           />
 
-          <Select value={String(limit)} onValueChange={(v) => {
-            setLimit(Number(v))
-            setPage(1)
-          }}>
+          <Select value={String(limit)} onValueChange={(v) => setLimit(Number(v))}>
             <SelectTrigger className="w-full md:w-24">
               <SelectValue />
             </SelectTrigger>
@@ -84,26 +86,22 @@ const Suppliers = () => {
               <SelectItem value="50">50</SelectItem>
             </SelectContent>
           </Select>
-
-          {/* Create Button */}
-          <CreateSupplier fetchSuppliers={fetchSuppliers} />
         </div>
       </div>
 
-     
-      {isLoading ? (
-        <p className="text-center p-4">Loading suppliers...</p> 
-      ) : (
-        <div className="overflow-x-auto">
-          <SuppliersTable
-            suppliers={suppliers}
-            fetchSuppliers={fetchSuppliers} 
-          />
-        </div>
-      )}
+      <h2 className="text-2xl font-semibold">Suppliers Detail</h2>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <SuppliersTable
+          suppliers={suppliers}
+          loading={loading}
+          fetchSuppliers={fetchSuppliers}
+        />
+      </div>
 
       {/* Pagination */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-2 mt-4">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-2 mt-2">
         <div className="flex gap-2">
           <Button
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
@@ -118,7 +116,7 @@ const Suppliers = () => {
 
           <Button
             onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={page === totalPages || totalPages === 0}
+            disabled={page === totalPages}
           >
             Next
           </Button>
@@ -131,5 +129,3 @@ const Suppliers = () => {
     </div>
   )
 }
-
-export default Suppliers

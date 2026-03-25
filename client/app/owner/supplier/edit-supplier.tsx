@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -17,33 +18,26 @@ const EditSupplier = ({ supplier, fetchSuppliers }: any) => {
   const [open, setOpen] = useState(false)
 
   const updateSupplier = async (id: string, supplierInfo: any) => {
-    try {
-      const { data } = await axios.put(
-        `http://localhost:8080/api/suppliers/${id}`,
-        supplierInfo
-      )
-      return data
-    } catch (err) {
-      throw err
-    }
+    const { data } = await axios.put(
+      `http://localhost:8080/api/suppliers/${id}`,
+      supplierInfo
+    )
+    return data
   }
 
-  const handleSubmit = async (
-    values: any,
-    { resetForm, setSubmitting }: any
-  ) => {
+  const handleSubmit = async (values: any, { resetForm, setSubmitting }: any) => {
     try {
+      setSubmitting(true)
       const data = await updateSupplier(supplier._id, values)
 
       toast.success(data.message || "Supplier updated successfully")
 
+      // Wait for table refresh
       await fetchSuppliers()
       resetForm()
       setOpen(false)
     } catch (err: any) {
-      toast.error(
-        err.response?.data?.message || "Failed to update supplier"
-      )
+      toast.error(err.response?.data?.message || "Failed to update supplier")
     } finally {
       setSubmitting(false)
     }
@@ -58,6 +52,9 @@ const EditSupplier = ({ supplier, fetchSuppliers }: any) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Supplier</DialogTitle>
+          <DialogDescription>
+            Update the supplier information below.
+          </DialogDescription>
         </DialogHeader>
 
         <SupplierForm

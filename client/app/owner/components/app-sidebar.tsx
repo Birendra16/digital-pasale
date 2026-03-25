@@ -1,9 +1,8 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { BarChart3, Boxes, Building2, Home, Package, Settings, ShoppingBasketIcon, Users } from "lucide-react"
-
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { BarChart3, Boxes, Building2, Home, Package, Settings, ShoppingBasketIcon, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,60 +12,24 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-// Menu items.
+// Menu items
 const items = [
-  {
-    title: "Dashboard",
-    url: "/owner",
-    icon: Home,
-  },
-  {
-    title: "Products",
-    url: "/owner/product",
-    icon: Package,
-  },
-  {
-    title: "Inventory",
-    url: "/owner/inventory",
-    icon: Boxes,
-  },
-  {
-    title: "Suppliers",
-    url: "/owner/supplier",
-    icon: Building2,
-  },
-  {
-    title: "Customers",
-    url: "/owner/customer",
-    icon: Users,
-  },
-  {
-    title: "Sales",
-    url: "/owner/sales",
-    icon: BarChart3,
-  },
-  {
-    title: "Purchase",
-    url: "/owner/purchase",
-    icon: ShoppingBasketIcon,
-  },
-  {
-    title: "Settings",
-    url: "/owner/settings",
-    icon: Settings,
-  },
-]
+  { title: "Dashboard", url: "/owner/dashboard", icon: Home },
+  { title: "Inventory", url: "/owner/inventory", icon: Boxes },
+  { title: "Suppliers", url: "/owner/supplier", icon: Building2 },
+  { title: "Customers", url: "/owner/customer", icon: Users },
+  { title: "Sales", url: "/owner/sales", icon: BarChart3 },
+  { title: "Purchase", url: "/owner/purchase", icon: ShoppingBasketIcon },
+  { title: "Settings", url: "/owner/settings", icon: Settings },
+];
 
 export function AppSidebar() {
-  // Render after mount to avoid server/client markup mismatch in sidebar tree.
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  if (!mounted) return null
+  if (!mounted) return null;
 
   return (
     <Sidebar>
@@ -78,7 +41,7 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <Link href={item.url} className="flex items-center gap-2">
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
@@ -90,5 +53,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

@@ -1,15 +1,20 @@
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
-import React from 'react'
-import { AppSidebar } from './components/app-sidebar'
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import React from "react";
+import { AppSidebar } from "./components/app-sidebar";
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <main>
-        <SidebarTrigger />
-        {children}
-      </main>
+      <div className="flex h-screen w-full">
+        {/* Sidebar */}
+        <AppSidebar />
+
+        {/* Main content */}
+        <main className="flex-1 min-w-0 overflow-auto p-4">
+          <SidebarTrigger />
+          {children}
+        </main>
+      </div>
     </SidebarProvider>
-  )
+  );
 }

@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 
@@ -36,6 +37,9 @@ export default function DeleteSubUnit({ id, deleteSubUnit }: DeleteSubUnitProps)
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete SubUnit</DialogTitle>
+          <DialogDescription>
+            This action will permanently delete the subunit.        
+            </DialogDescription>
         </DialogHeader>
 
         <div>Are you sure you want to delete this subunit?</div>

@@ -4,10 +4,8 @@ import Connect from "./db/connect.js";
 import authRouter from "./routes/user.js";
 import subscriptionRouter from "./routes/subscription.js";
 import cors from "cors";
-import productRouter from "./routes/product.js";
 
 import "./models/unit.js";
-import "./models/product.js";
 import unitRouter from "./routes/unit.js";
 import inventoryRouter from "./routes/inventory.js";
 import purchaseRouter from "./routes/purchase.js";
@@ -17,6 +15,7 @@ import { Server } from "socket.io";
 import http from "http";
 import customerRouter from "./routes/customer.js";
 import salesRouter from "./routes/sales.js";
+import dashboardRouter from "./routes/dashboard.js";
 
 dotenv.config();
 
@@ -41,7 +40,6 @@ Connect();
 
 app.use("/api/auth", authRouter);
 app.use("/api/subscription", subscriptionRouter);
-app.use("/api/products", productRouter);
 app.use("/api/units", unitRouter);
 app.use("/api/subunits",subUnitRouter)
 app.use("/api/inventory", inventoryRouter);
@@ -49,6 +47,7 @@ app.use("/api/purchases", purchaseRouter)
 app.use("/api/suppliers", supplierRouter)
 app.use("/api/customers", customerRouter)
 app.use("/api/sales", salesRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {

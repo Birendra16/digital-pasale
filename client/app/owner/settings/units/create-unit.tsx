@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -84,6 +85,9 @@ export default function CreateUnit({ createUnit }: CreateUnitProps) {
         <form onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle>Add Unit</DialogTitle>
+            <DialogDescription>
+              Fill out the form below to add a new unit.
+              </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">

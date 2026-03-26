@@ -1,66 +1,37 @@
 import User from "../models/user.js";
-import Subscription from "../models/subscription.js";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const register = async (req, res) => {
+export const signup = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
+    const emailLower = email.toLowerCase();
 
-    if (!username || !email || !password)
-      return res.status(400).json({ message: "All fields are required" });
+    const existing = await User.findOne({ email: emailLower });
+    if (existing) return res.status(400).json({ msg: "User exists" });
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.status(400).json({ message: "Email already registered" });
+    await User.create({ name, email: emailLower, password });
 
-    const ownerExists = await User.findOne({ role: "OWNER" });
+    res.json({ msg: "Signup successful. Waiting for admin approval" });
 
-    const user = await User.create({
-      username,
-      email,
-      password,
-      role: ownerExists ? "STAFF" : "OWNER",
-    });
-
-    // Free trial for OWNER
-    if (!ownerExists) {
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 7);
-
-      await Subscription.create({
-        owner: user._id,
-        plan: "FREE",
-        endDate,
-      });
-    }
-
-    res.status(201).json({
-      message: "Account created",
-      role: user.role,
-    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error(err.message);
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
-const login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password)
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    if (!user) return res.status(400).json({ msg: "User not found" });
 
-    const user = await User.findOne({ email });
-    if (!user)
-      return res.status(401).json({ message: "Invalid email or password" });
+    const valid = await user.comparePassword(password);
+    if (!valid) return res.status(400).json({ msg: "Invalid password" });
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match)
-      return res.status(401).json({ message: "Invalid email or password" });
+    if (user.status !== "ACTIVE") return res.status(403).json({ msg: "Account pending approval" });
+
+    if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET not defined");
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -68,18 +39,19 @@ const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        username: user.username,
-        role: user.role,
-      },
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production"
     });
+
+    const { password: _, ...safeUser } = user.toObject();
+    res.json({ msg: "Login successful",
+      token,
+       user: safeUser });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error(err.message);
+    res.status(500).json({ msg: "Server error" });
   }
 };
-
-export { register, login };

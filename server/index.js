@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import Connect from "./db/connect.js";
-import authRouter from "./routes/user.js";
+import authRouter from "./routes/auth.js";
 import subscriptionRouter from "./routes/subscription.js";
 import cors from "cors";
 
@@ -16,6 +16,9 @@ import http from "http";
 import customerRouter from "./routes/customer.js";
 import salesRouter from "./routes/sales.js";
 import dashboardRouter from "./routes/dashboard.js";
+import cookieParser from "cookie-parser";
+import adminRouter from "./routes/admin.js";
+import paymentRouter from "./routes/payment.js";
 
 dotenv.config();
 
@@ -30,6 +33,7 @@ export const io = new Server(server, {
 });
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: 'http://localhost:3000',
@@ -48,6 +52,8 @@ app.use("/api/suppliers", supplierRouter)
 app.use("/api/customers", customerRouter)
 app.use("/api/sales", salesRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/payment", paymentRouter);
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {

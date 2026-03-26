@@ -1,90 +1,121 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Image from 'next/image';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import axios from 'axios';
-import { User, Lock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import axios from "axios";
+import { toast } from "sonner";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const LoginPage = () => {
-const router = useRouter();
-  const LoginSchema = Yup.object().shape({
-    email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string().required('Password is required'),
-  });
+// shadcn/ui
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-  const handleLogin = async (values: { email: string; password: string }) => {
+// icons
+import { Mail, Lock } from "lucide-react";
+
+const LoginSchema = Yup.object().shape({
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  password: Yup.string().required("Password is required"),
+});
+
+export default function LoginPage() {
+  const router = useRouter();
+
+  const handleSubmit = async (values: any, { resetForm }: any) => {
     try {
-      const response= await axios.post('http://localhost:8080/api/auth/login', values);
-      const {token, user}= response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      toast(response.data.message || 'Login successful');
-      router.push('/owner');
-    } catch (err:any) {
-      toast(err.response?.data?.message || 'Login failed');
+      const res = await axios.post(
+        "http://localhost:8080/api/auth/login",
+        values
+      );
+
+      const user = res.data.user;
+      const token = res.data.token;
+
+      // ✅ SAVE AUTH DATA
+      localStorage.setItem("USER", JSON.stringify(user));
+      localStorage.setItem("TOKEN", token);
+
+      toast.success("Login successful");
+
+      // ✅ ROLE REDIRECT
+      if (user.role === "ADMIN") {
+        router.push("/admin");
+      } else if (user.role === "OWNER") {
+        router.push("/owner/dashboard");
+      }
+
+      resetForm();
+
+    } catch (err: any) {
+      const message = err.response?.data?.msg;
+
+      if (message === "Account pending approval") {
+        toast.error(message);
+        router.push("/pending");
+      } else {
+        toast.error(message || "Invalid credentials");
+      }
     }
   };
 
   return (
-    <div className="bg-gray-800 min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white p-6 sm:p-8 md:p-10 rounded-2xl shadow-lg w-full max-w-md sm:max-w-lg">
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/digitalpasale.png"
-            alt="Digital Pasale Logo"
-            width={150}
-            height={150}
-            className="object-contain"
-          />
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 p-4">
+      <Card className="w-full max-w-md shadow-xl rounded-xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold text-gray-800">
+            Digital Pasale
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-1">
+            Login to your account
+          </p>
+        </CardHeader>
 
-        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800 text-center">Login</h2>
+        <CardContent>
+          <Formik
+            initialValues={{ email: "", password: "" }}
+            validationSchema={LoginSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting }) => (
+              <Form className="space-y-4">
 
-        <Formik
-          initialValues={{ email: '', password: '' }}
-          validationSchema={LoginSchema}
-          onSubmit={handleLogin}
-        >
-          {() => (
-            <Form className="space-y-4">
-              <div className="flex items-center border border-gray-300 rounded-lg p-2">
-                <User className="text-gray-400 mr-2" />
-                <Field
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  className="flex-1 p-2 outline-none bg-gray-100 rounded-lg"
-                />
-              </div>
-              <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+                <div>
+                  <Label>Email</Label>
+                  <div className="flex items-center border rounded-lg p-2 mt-1">
+                    <Mail className="w-5 h-5 text-gray-400 mr-2" />
+                    <Field as={Input} name="email" />
+                  </div>
+                  <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+                </div>
 
-              <div className="flex items-center border border-gray-300 rounded-lg p-2">
-                <Lock className="text-gray-400 mr-2" />
-                <Field
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  className="flex-1 p-2 outline-none bg-gray-100 rounded-lg"
-                />
-              </div>
-              <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+                <div>
+                  <Label>Password</Label>
+                  <div className="flex items-center border rounded-lg p-2 mt-1">
+                    <Lock className="w-5 h-5 text-gray-400 mr-2" />
+                    <Field as={Input} type="password" name="password" />
+                  </div>
+                  <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+                </div>
 
-              <button
-                type="submit"
-                className="bg-green-500 w-full text-white py-2 rounded-lg hover:bg-green-600 transition-colors text-lg sm:text-base"
-              >
-                Login
-              </button>
-            </Form>
-          )}
-        </Formik>
-      </div>
+                <Button type="submit" className="w-full bg-gray-700">
+                  {isSubmitting ? "Logging in..." : "Login"}
+                </Button>
+
+                <p className="text-center text-sm text-gray-600">
+                  Don't have an account?{" "}
+                  <Link href="/signup" className="underline">
+                    Sign Up
+                  </Link>
+                </p>
+
+              </Form>
+            )}
+          </Formik>
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default LoginPage;
+}

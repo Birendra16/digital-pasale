@@ -6,7 +6,7 @@ import axios from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const UpdateStockModal = ({ item, close, refresh }) => {
+const UpdateStockModal = ({ item, close, refresh }: { item: any; close: any; refresh: any }) => {
 
   const [form, setForm] = useState({
     quantityIn: 0,
@@ -16,7 +16,7 @@ const UpdateStockModal = ({ item, close, refresh }) => {
     movementType: "PURCHASE",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -35,7 +35,7 @@ const UpdateStockModal = ({ item, close, refresh }) => {
       return;
     }
 
-    await axios.put(`http://localhost:8080/api/inventory/update`, {
+    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory/update`, {
       productId: item.product._id,
       unitId: item.unit._id,
       quantityIn: qtyIn,

@@ -27,7 +27,7 @@ const CreateSupplier = ({ fetchSuppliers }: any) => {
 
   const createSupplier = async (supplierInfo: any) => {
     const { data } = await axios.post(
-      "http://localhost:8080/api/suppliers",
+      `${process.env.NEXT_PUBLIC_API_URL}/api/suppliers`,
       supplierInfo
     )
     return data

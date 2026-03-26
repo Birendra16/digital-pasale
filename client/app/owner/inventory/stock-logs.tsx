@@ -4,13 +4,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 
-const StockLogsModal = ({item, close}) => {
-  const [logs, setLogs] = useState([])
+const StockLogsModal = ({item, close}: {item: any; close: any}) => {
+  const [logs, setLogs] = useState<any[]>([])
 
   const fetchLogs = async ()=>{
     
     const {data} = await axios.get(
-      `http://localhost:8080/api/inventory/logs/${item._id}`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/inventory/logs/${item._id}`
     )
     setLogs(data.logs)
   };

@@ -27,8 +27,9 @@ export default function LoginPage() {
   const handleSubmit = async (values: any, { resetForm }: any) => {
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        values
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        values,
+        { withCredentials: true }
       );
 
       const user = res.data.user;

@@ -47,7 +47,7 @@ export default function CustomersPage() {
   const fetchCustomers = async () => {
     try {
       setLoading(true)
-      const res = await axios.get("http://localhost:8080/api/customers", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/customers`, {
         params: { search: debouncedSearch, page, limit },
       })
       setCustomers(res.data.data || [])
@@ -61,7 +61,7 @@ export default function CustomersPage() {
 
   const createCustomer = async (data: any) => {
     try {
-      const res = await axios.post("http://localhost:8080/api/customers", data)
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/customers`, data)
       toast.success(res.data.message)
       fetchCustomers()
     } catch (err: any) {
@@ -71,7 +71,7 @@ export default function CustomersPage() {
 
   const editCustomer = async (id: string, data: any) => {
     try {
-      const res = await axios.put(`http://localhost:8080/api/customers/${id}`, data)
+      const res = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/customers/${id}`, data)
       toast.success(res.data.message)
       fetchCustomers()
     } catch (err: any) {
@@ -81,7 +81,7 @@ export default function CustomersPage() {
 
   const deleteCustomer = async (id: string) => {
     try {
-      const res = await axios.delete(`http://localhost:8080/api/customers/${id}`)
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/customers/${id}`)
       toast.success(res.data.message)
       fetchCustomers()
     } catch (err: any) {

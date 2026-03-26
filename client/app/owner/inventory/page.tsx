@@ -85,7 +85,7 @@ export default function Inventory() {
   // Fetch inventory
   const fetchInventory = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/inventory");
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory`);
       setInventory(res.data.products || []);
     } catch (err) {
       console.error("Failed to fetch inventory", err);
@@ -100,7 +100,7 @@ export default function Inventory() {
     if (typeof window === "undefined") return;
 
     const { io } = require("socket.io-client");
-    const socket = io("http://localhost:8080", {
+    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}`, {
       transports: ["websocket", "polling"],
       reconnectionAttempts: 5,
     });

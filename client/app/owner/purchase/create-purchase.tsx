@@ -85,7 +85,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   const fetchSuppliers = async () => {
     setLoadingSuppliers(true)
     try {
-      const res = await axios.get("http://localhost:8080/api/suppliers")
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/suppliers`)
       setSuppliers(res.data.suppliers || [])
     } catch {
       toast.error("Failed to load suppliers")
@@ -98,7 +98,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   const fetchUnits = async () => {
     setLoadingUnits(true)
     try {
-      const res = await axios.get("http://localhost:8080/api/units")
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/units`)
       setUnits(res.data.units || [])
     } catch {
       toast.error("Failed to load units")
@@ -111,7 +111,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
   const fetchSubUnits = async () => {
     setLoadingSubUnits(true)
     try {
-      const res = await axios.get("http://localhost:8080/api/subunits")
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/subunits`)
       setSubUnits(res.data.subUnits || [])
     } catch {
       toast.error("Failed to load subunits")
@@ -207,7 +207,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
 
     try {
       setSubmitting(true)
-      await axios.post("http://localhost:8080/api/purchases", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/purchases`, {
         supplierId,
         items: items.map((item) => ({
           productName: item.productName,
@@ -323,7 +323,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
                 {isActive && (
                   <div className="p-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                     <Input
-                      ref={(el) => (inputRefs.current[index] = el)}
+                      ref={(el) => { inputRefs.current[index] = el }}
                       placeholder="Product Name"
                       value={item.productName}
                       onChange={(e) =>

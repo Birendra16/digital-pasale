@@ -22,7 +22,7 @@ export default function ApprovalsPage() {
   const fetchUsers = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8080/api/admin/pending-users",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/pending-users`,
         { withCredentials: true }
       );
       setUsers(res.data);
@@ -34,7 +34,7 @@ export default function ApprovalsPage() {
   const approveUser = async (id: string) => {
     try {
       await axios.put(
-        `http://localhost:8080/api/admin/approve-user/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/approve-user/${id}`,
         {},
         { withCredentials: true }
       );
@@ -48,7 +48,7 @@ export default function ApprovalsPage() {
   const rejectUser = async (id: string) => {
     try {
       await axios.put(
-        `http://localhost:8080/api/admin/reject-user/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/reject-user/${id}`,
         {},
         { withCredentials: true }
       );
@@ -87,7 +87,7 @@ export default function ApprovalsPage() {
             {users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-6">
-                  No pending users 
+                  No pending users
                 </TableCell>
               </TableRow>
             ) : (

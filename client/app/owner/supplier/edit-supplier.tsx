@@ -19,7 +19,7 @@ const EditSupplier = ({ supplier, fetchSuppliers }: any) => {
 
   const updateSupplier = async (id: string, supplierInfo: any) => {
     const { data } = await axios.put(
-      `http://localhost:8080/api/suppliers/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/suppliers/${id}`,
       supplierInfo
     )
     return data

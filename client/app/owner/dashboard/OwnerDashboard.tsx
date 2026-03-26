@@ -22,7 +22,7 @@ export default function OwnerDashboard() {
 
   const fetchDashboard = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/dashboard/metrics", { withCredentials: true });
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/metrics`, { withCredentials: true });
       setData(res.data.data);
     } catch (err) { console.error("Error fetching dashboard metrics:", err); }
     finally { setLoading(false); }

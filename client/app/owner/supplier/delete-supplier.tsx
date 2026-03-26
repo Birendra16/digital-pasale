@@ -20,7 +20,7 @@ const DeleteSupplier = ({ id, fetchSuppliers }: any) => {
 
   const deleteSupplier = async (supplierId: string) => {
     const { data } = await axios.delete(
-      `http://localhost:8080/api/suppliers/${supplierId}`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/suppliers/${supplierId}`
     )
     return data
   }

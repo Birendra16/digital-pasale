@@ -19,7 +19,7 @@ const SubUnits = () => {
   const fetchSubUnits = async () => {
     setLoading(true)
     try {
-      const { data } = await axios.get("http://localhost:8080/api/subunits")
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/subunits`)
       setSubUnits(data.subUnits || [])
     } catch(err:any) {
       toast.error(err.response?.data?.message || "Failed to load subunits")
@@ -31,7 +31,7 @@ const SubUnits = () => {
 
   const createSubUnit = async (data:any) => {
   try {
-    const res = await axios.post("http://localhost:8080/api/subunits", data)
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/subunits`, data)
     
     toast.success(res.data.message)
     fetchSubUnits()
@@ -43,7 +43,7 @@ const SubUnits = () => {
 
   const editSubUnit = async (id: string, data: any) => {
   try {
-    const res = await axios.put(`http://localhost:8080/api/subunits/${id}`, data)
+    const res = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/subunits/${id}`, data)
 
     toast.success(res.data.message)
 
@@ -56,7 +56,7 @@ const SubUnits = () => {
 
   const deleteSubUnit = async (id: string) => {
   try {
-    const res = await axios.delete(`http://localhost:8080/api/subunits/${id}`)
+    const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/subunits/${id}`)
 
     toast.success(res.data.message)
 

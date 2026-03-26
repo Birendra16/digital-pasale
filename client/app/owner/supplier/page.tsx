@@ -45,7 +45,7 @@ export default function SuppliersPage() {
   const fetchSuppliers = async () => {
     try {
       setLoading(true)
-      const res = await axios.get("http://localhost:8080/api/suppliers", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/suppliers`, {
         params: { search: debouncedSearch, page, limit },
       })
       setSuppliers(res.data.suppliers || [])

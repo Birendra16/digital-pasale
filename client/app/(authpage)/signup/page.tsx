@@ -28,7 +28,7 @@ export default function SignupPage() {
   const handleSubmit = async (values: any, { resetForm }: any) => {
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/auth/signup",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`,
         values
       );
 
@@ -44,7 +44,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 p-4">
+    <div className="min-h-screen flex items-center justify-center `bg-gradient-to-br` from-indigo-50 to-purple-100 p-4">
       <Card className="w-full max-w-md shadow-xl rounded-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-gray-800">

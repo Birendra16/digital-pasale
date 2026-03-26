@@ -34,7 +34,7 @@ export default function PurchasesPage() {
   const fetchPurchases = async () => {
     try {
       setLoading(true)
-      const res = await axios.get("http://localhost:8080/api/purchases", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/purchases`, {
         params: { search: debouncedSearch, date, page, limit },
       })
       setPurchases(res.data.purchases || [])

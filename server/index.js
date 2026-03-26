@@ -27,7 +27,7 @@ const server = http.createServer(app);
 
 export const io = new Server(server, {
   cors: {
-    origin:"http://localhost:3000",
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
   }
 });
@@ -36,7 +36,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || "http://localhost:3000",
   credentials: true,
 }));
 

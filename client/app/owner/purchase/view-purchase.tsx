@@ -13,7 +13,7 @@ export default function ViewPurchase({ id }: { id: string }) {
   useEffect(() => {
     if (!open) return
     const fetchData = async () => {
-      const res = await axios.get(`http://localhost:8080/api/purchases/${id}`)
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/purchases/${id}`)
       setData(res.data.purchase)
     }
     fetchData()

@@ -19,7 +19,7 @@ const Units = () => {
   const fetchUnits = async () => {
     try {
       setLoading(true)
-      const { data } = await axios.get("http://localhost:8080/api/units")
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/units`)
       setUnits(data.units || [])
     } catch(err:any) {
       toast.error(err.response?.data?.message || "Failed to load units")
@@ -31,7 +31,7 @@ const Units = () => {
 
   const createUnit = async (unitInfo: any) => {
     try {
-      const res = await axios.post("http://localhost:8080/api/units", unitInfo)
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/units`, unitInfo)
       toast.success(res.data.message)
       fetchUnits()
     } catch(err:any) {
@@ -42,7 +42,7 @@ const Units = () => {
 
   const editUnit = async (id: string, unitInfo: any) => {
     try {
-      const res = await axios.put(`http://localhost:8080/api/units/${id}`, unitInfo)
+      const res = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/units/${id}`, unitInfo)
       toast.success(res.data.message)
       fetchUnits()
     } catch(err:any) {
@@ -53,7 +53,7 @@ const Units = () => {
 
   const deleteUnit = async (id: string) => {
     try {
-      const res = await axios.delete(`http://localhost:8080/api/units/${id}`)
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/units/${id}`)
     toast.success(res.data.message)
       fetchUnits()
     } catch (err:any){

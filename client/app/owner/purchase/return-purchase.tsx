@@ -28,7 +28,7 @@ export default function ReturnPurchase({ purchase }: any) {
 
     try {
       setLoading(true)
-      await axios.post("http://localhost:8080/api/purchases/return", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/purchases/return`, {
         purchaseId: purchase._id,
         items
       })

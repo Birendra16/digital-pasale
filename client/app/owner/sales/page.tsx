@@ -33,7 +33,7 @@ export default function SalesPage() {
   const fetchSales = async () => {
     try {
       setLoading(true)
-      const res = await axios.get("http://localhost:8080/api/sales", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sales`, {
         params: { search: debouncedSearch, page, limit },
       })
       setSales(res.data.data || []) 

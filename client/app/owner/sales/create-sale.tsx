@@ -46,11 +46,11 @@ export default function CreateSale({ onCreated }: any) {
   const selectRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/inventory")
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory`)
       .then(res => setInventory(res.data.products))
       .catch(() => toast.error("Failed to load inventory"))
 
-    axios.get("http://localhost:8080/api/customers")
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/customers`)
       .then(res => setCustomers(res.data.data))
       .catch(() => toast.error("Failed to load customers"))
   }, [])
@@ -62,7 +62,7 @@ export default function CreateSale({ onCreated }: any) {
       else value = Math.max(0, Number(value))
     }
 
-    updated[i][field] = value
+    (updated[i] as any)[field] = value
 
     const item = updated[i]
     if (typeof item.unitQuantity === 'number' && typeof item.subUnitQuantity === 'number') {
@@ -75,7 +75,7 @@ export default function CreateSale({ onCreated }: any) {
   }
 
   const addItem = () => {
-    const newItems = [...items, {
+    const newItem: SaleItem = {
       inventoryId: "",
       productName: "",
       sku: "",
@@ -84,7 +84,8 @@ export default function CreateSale({ onCreated }: any) {
       subUnitQuantity: "",
       sellingPricePerUnit: "",
       sellingPricePerSubUnit: "",
-    }]
+    }
+    const newItems = [...items, newItem]
     setItems(newItems)
     const newIndex = newItems.length - 1
     setActiveIndex(newIndex)
@@ -155,7 +156,7 @@ export default function CreateSale({ onCreated }: any) {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/sales/", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/`, {
         customerId,
         paidAmount,
         items: items.map(item => ({
@@ -251,7 +252,7 @@ export default function CreateSale({ onCreated }: any) {
                       updateItem(index, "sku", selected?.sku)
                       updateItem(index, "unitCapacity", selected?.unitCapacity)
                     }}>
-                      <SelectTrigger ref={(el) => selectRefs.current[index] = el}>
+                      <SelectTrigger ref={(el) => { selectRefs.current[index] = el }}>
                         <SelectValue placeholder="Select product (SKU visible)" />
                       </SelectTrigger>
                       <SelectContent>

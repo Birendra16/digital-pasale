@@ -77,7 +77,7 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8080/api/admin/dashboard-stats",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/dashboard-stats`,
         getAuthHeader()
       );
       setStats(res.data);
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
   const fetchChart = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8080/api/admin/daily-signups",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/daily-signups`,
         getAuthHeader()
       );
       setChartData(res.data);

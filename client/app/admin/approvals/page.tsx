@@ -21,9 +21,13 @@ export default function ApprovalsPage() {
 
   const fetchUsers = async () => {
     try {
+      const token = localStorage.getItem("TOKEN");
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/pending-users`,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
       setUsers(res.data);
     } catch (err) {
@@ -33,10 +37,14 @@ export default function ApprovalsPage() {
 
   const approveUser = async (id: string) => {
     try {
+      const token = localStorage.getItem("TOKEN");
       await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/approve-user/${id}`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
       toast.success("User approved ✅");
       fetchUsers();
@@ -47,10 +55,14 @@ export default function ApprovalsPage() {
 
   const rejectUser = async (id: string) => {
     try {
+      const token = localStorage.getItem("TOKEN");
       await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/reject-user/${id}`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
       toast.success("User rejected ❌");
       fetchUsers();

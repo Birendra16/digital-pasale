@@ -39,16 +39,19 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production"
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
     });
 
     const { password: _, ...safeUser } = user.toObject();
-    res.json({ msg: "Login successful",
+    res.json({
+      msg: "Login successful",
       token,
-       user: safeUser });
+      user: safeUser
+    });
 
   } catch (err) {
     console.error(err.message);

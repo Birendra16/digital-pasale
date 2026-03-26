@@ -22,7 +22,7 @@
 - [x] **Admin Panel** — Approve/reject user registrations, manage roles and access
 - [x] **Dashboard** — Real-time overview of sales, purchases & inventory with charts (Recharts)
 - [x] **Settings** — Manage units and sub-units app-wide
-- [x] **Subscriptions & Payments** — Subscription plan management and payment tracking
+- [ ] **Subscriptions & Payments** — Subscription plan management and payment tracking
 - [x] **Real-time Updates** — Live data sync via Socket.io
 - [ ] **Reports** — Daily sales report, stock valuation, customer due report *(coming soon)*
 
@@ -127,6 +127,25 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | **Client** | Vercel | [digital-pasale-client.vercel.app](https://digital-pasale-client.vercel.app) |
 | **Server** | Render | [digital-pasale-server.onrender.com](https://digital-pasale-server.onrender.com) |
 | **Database** | MongoDB Atlas | Cloud hosted |
+
+---
+
+## 🛠️ Production Troubleshooting
+
+If you see `401 Unauthorized` or `Failed to fetch` in production:
+
+1. **Render (Server):**
+   - Ensure `NODE_ENV=production` is set in Environment Variables.
+   - Ensure `CLIENT_URL=https://your-vercel-app.vercel.app` (no trailing slash).
+   - Ensure `MONGO_URI` and `JWT_SECRET` are correct.
+
+2. **Vercel (Client):**
+   - Ensure `NEXT_PUBLIC_API_URL=https://your-render-app.onrender.com` (no trailing slash).
+   - If changes don't show up, go to **Deployments** → **Redeploy** to force an update.
+
+3. **CORS & Cookies:**
+   - The app uses a global axios interceptor (`AuthInitializer.tsx`) and `sameSite: "none"` cookies for cross-origin support.
+   - Make sure your browser isn't blocking third-party cookies (though the `Bearer` token fallback should handle this).
 
 ---
 

@@ -1,33 +1,79 @@
 # Digital Pasale (डिजिटल पसले)
 
-**Digital Pasale** is a **modern MERN stack wholesale grocery management system** designed to simplify operations for Nepali shop owners. From **fast billing** to **credit tracking** and **inventory management**, it covers everything a wholesale shop needs.
+**Digital Pasale** is a **modern full-stack wholesale grocery management system** built for Nepali shop owners. It streamlines day-to-day operations including inventory tracking, sales & purchases, supplier/customer management, and admin approvals — all in one platform.
+
+🌐 **Live Demo:** [digital-pasale-client.vercel.app](https://digital-pasale-client.vercel.app)
 
 ---
 
 ## 🚀 Features
 
-### ✅ Phase 1 – Minimum Viable Product (Core Features)
-- [x] **Authentication & User Roles (Owner / Staff):** Secure login with owner-first setup; owner can create staff accounts.  
-- [x] **Product Module:** Manage products with multiple units and unit conversions (carton, sack, dozen, piece, kg).  
-- [x] **Inventory Module:** Track stock in/out, damaged goods, expiry dates, and low stock alerts.  
-- [x] **Purchase Module:** Record purchases that update inventory and stock logs.  
-- [ ] **Sales / POS Module:** Fast billing, bulk quantity support, VAT 13% auto-calculation, invoice generation, partial payments.  
-- [ ] **Customer Module:** Credit management, ledger tracking, partial payments, total dues.  
-- [ ] **Basic Reports:** Daily sales, stock valuation, customer due report.
+### ✅ Phase 1 — Core MVP
+
+- [x] **Authentication & User Roles** — Secure JWT login with role-based access (Admin / Owner / Staff)
+- [x] **Inventory Module** — Track stock levels, stock-in/out logs, unit & sub-unit conversions
+- [x] **Purchase Module** — Record purchases, auto-update inventory, view & return purchases
+- [x] **Sales / POS Module** — Fast billing, bulk quantity support, sales history with search & pagination
+- [x] **Customer Module** — Add, edit, delete customers; search and filter support
+- [x] **Supplier Module** — Manage suppliers, create/edit/delete with full CRUD
+
+### ✅ Phase 2 — Advanced Features
+
+- [x] **Admin Panel** — Approve/reject user registrations, manage roles and access
+- [x] **Dashboard** — Real-time overview of sales, purchases & inventory with charts (Recharts)
+- [x] **Settings** — Manage units and sub-units app-wide
+- [x] **Subscriptions & Payments** — Subscription plan management and payment tracking
+- [x] **Real-time Updates** — Live data sync via Socket.io
+- [ ] **Reports** — Daily sales report, stock valuation, customer due report *(coming soon)*
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Next.js, React, Tailwind CSS, ShadCN, Lucide React, Redux Toolkit, Formik + Yup, Axios  
-- **Backend:** Node.js, Express.js  
-- **Database:** MongoDB with Mongoose  
-- **Authentication:** JWT (JSON Web Tokens)  
-- **API Architecture:** RESTful APIs  
+| Layer | Technology |
+|---|---|
+| **Frontend** | Next.js 15, React 19, TypeScript |
+| **Styling** | Tailwind CSS v4, ShadCN UI, Lucide React |
+| **Forms** | Formik + Yup |
+| **Tables** | TanStack React Table |
+| **Charts** | Recharts |
+| **HTTP Client** | Axios |
+| **Real-time** | Socket.io |
+| **Backend** | Node.js, Express.js v5 |
+| **Database** | MongoDB with Mongoose |
+| **Auth** | JWT + Cookie Parser |
+| **Deployment** | Vercel (client) + Render (server) |
 
 ---
 
-## ⚙️ Installation Steps
+## 📁 Project Structure
+
+```
+digital-pasale/
+├── client/                  # Next.js frontend
+│   ├── app/
+│   │   ├── (authpage)/      # Login & Signup
+│   │   ├── admin/           # Admin panel & approvals
+│   │   └── owner/           # Owner dashboard & modules
+│   │       ├── customer/
+│   │       ├── dashboard/
+│   │       ├── inventory/
+│   │       ├── purchase/
+│   │       ├── sales/
+│   │       ├── settings/
+│   │       └── supplier/
+│   └── components/          # Reusable UI components
+│
+└── server/                  # Express.js backend
+    ├── controllers/         # Business logic
+    ├── models/              # Mongoose schemas
+    ├── routes/              # API routes
+    └── middlewares/         # Auth & role middleware
+```
+
+---
+
+## ⚙️ Local Setup
 
 ### 1. Clone the repository
 ```bash
@@ -41,11 +87,12 @@ cd server
 npm install
 ```
 
-Create a .env file in the server directory
-```bash
+Create a `.env` file in the `server/` directory:
+```env
 PORT=8080
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_secret_key
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+CLIENT_URL=http://localhost:3000
 ```
 
 Start the server:
@@ -59,35 +106,32 @@ cd ../client
 npm install
 ```
 
-Create a .env.local file in the client directory:
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:3000
+Create a `.env.local` file in the `client/` directory:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-Start the client : 
+Start the client:
 ```bash
 npm run dev
 ```
 
----
-
-## 📞 Contact <a id="contact"></a>
-
-If you have any questions, feel free to reach out!
-
-* **Name**: Birendra Bohara  
-* **Email**: bbirendra693@gmail.com  
-* **GitHub**: [https://github.com/Birendra16/digital-pasale]
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
+## 🌐 Deployment
 
+| Service | Platform | URL |
+|---|---|---|
+| **Client** | Vercel | [digital-pasale-client.vercel.app](https://digital-pasale-client.vercel.app) |
+| **Server** | Render | [digital-pasale-server.onrender.com](https://digital-pasale-server.onrender.com) |
+| **Database** | MongoDB Atlas | Cloud hosted |
 
+---
 
+## 📞 Contact
 
-
-
- 
-
-
-
+* **Name:** Birendra Bohara
+* **Email:** bbirendra693@gmail.com
+* **GitHub:** [github.com/Birendra16](https://github.com/Birendra16)

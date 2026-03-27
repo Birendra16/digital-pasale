@@ -24,7 +24,6 @@
 - [x] **Settings** — Manage units and sub-units app-wide
 - [ ] **Subscriptions & Payments** — Subscription plan management and payment tracking
 - [x] **Real-time Updates** — Live data sync via Socket.io
-- [ ] **Reports** — Daily sales report, stock valuation, customer due report *(coming soon)*
 
 ---
 

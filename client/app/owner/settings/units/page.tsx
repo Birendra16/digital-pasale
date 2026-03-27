@@ -22,7 +22,7 @@ const Units = () => {
       const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/units`)
       setUnits(data.units || [])
     } catch(err:any) {
-      toast.error(err.response?.data?.message || "Failed to load units")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to load units")
       throw err;
     } finally {
       setLoading(false)
@@ -35,7 +35,7 @@ const Units = () => {
       toast.success(res.data.message)
       fetchUnits()
     } catch(err:any) {
-    toast.error(err.response?.data?.message || "Failed to create unit")
+    if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to create unit")
         throw err;
     }
   }
@@ -46,7 +46,7 @@ const Units = () => {
       toast.success(res.data.message)
       fetchUnits()
     } catch(err:any) {
-    toast.error(err.response?.data?.message || "Failed to update unit")
+    if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to update unit")
     throw err;
     }
   }
@@ -57,7 +57,7 @@ const Units = () => {
     toast.success(res.data.message)
       fetchUnits()
     } catch (err:any){
-    toast.error(err.response?.data?.message || "Failed to delete unit")
+    if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to delete unit")
     throw err;
     }
   }

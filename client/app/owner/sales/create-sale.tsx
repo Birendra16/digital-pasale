@@ -187,7 +187,7 @@ export default function CreateSale({ onCreated }: any) {
       setActiveIndex(0)
     } catch (err: any) {
       console.log(err.response?.data)
-      toast.error(err?.response?.data?.message || "Failed to create sale")
+      if (err?.response?.status !== 403) toast.error(err?.response?.data?.message || "Failed to create sale")
     }
   }
 

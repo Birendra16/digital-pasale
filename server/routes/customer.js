@@ -5,7 +5,7 @@ import { allowRoles, protect } from "../middlewares/auth.js";
 const customerRouter = express.Router();
 
 customerRouter.use(protect);
-customerRouter.use(allowRoles("OWNER", "ADMIN"));
+customerRouter.use(allowRoles("OWNER", "ADMIN", "STAFF"));
 
 customerRouter.post("/", createCustomer);
 customerRouter.get("/", getCustomers);

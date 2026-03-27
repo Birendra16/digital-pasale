@@ -19,6 +19,7 @@ import dashboardRouter from "./routes/dashboard.js";
 import cookieParser from "cookie-parser";
 import adminRouter from "./routes/admin.js";
 import paymentRouter from "./routes/payment.js";
+import staffRouter from "./routes/staff.js";
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use("/api/sales", salesRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/payment", paymentRouter);
+app.use("/api/staff", staffRouter);
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {

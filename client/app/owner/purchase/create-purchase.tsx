@@ -225,7 +225,7 @@ export default function CreatePurchase({ onCreated }: CreatePurchaseProps) {
       onCreated && onCreated()
     } catch (error: any) {
       console.error("CREATE PURCHASE ERROR:", error)
-      toast.error(error?.response?.data?.message || "Failed to create purchase")
+      if (error?.response?.status !== 403) toast.error(error?.response?.data?.message || "Failed to create purchase")
     } finally {
       setSubmitting(false)
     }

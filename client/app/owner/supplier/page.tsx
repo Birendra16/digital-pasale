@@ -51,7 +51,7 @@ export default function SuppliersPage() {
       setSuppliers(res.data.suppliers || [])
       setTotalPages(res.data.totalPages || 1)
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to fetch suppliers")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to fetch suppliers")
     } finally {
       setLoading(false)
     }

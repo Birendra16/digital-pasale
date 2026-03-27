@@ -37,7 +37,7 @@ const EditSupplier = ({ supplier, fetchSuppliers }: any) => {
       resetForm()
       setOpen(false)
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to update supplier")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to update supplier")
     } finally {
       setSubmitting(false)
     }

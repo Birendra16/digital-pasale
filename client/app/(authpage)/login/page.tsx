@@ -35,17 +35,19 @@ export default function LoginPage() {
       const user = res.data.user;
       const token = res.data.token;
 
-      // ✅ SAVE AUTH DATA
+      // SAVE AUTH DATA
       localStorage.setItem("USER", JSON.stringify(user));
       localStorage.setItem("TOKEN", token);
 
       toast.success("Login successful");
 
-      // ✅ ROLE REDIRECT
+      //  ROLE REDIRECT
       if (user.role === "ADMIN") {
         router.push("/admin");
       } else if (user.role === "OWNER") {
         router.push("/owner/dashboard");
+      } else if (user.role === "STAFF") {
+        router.push("/owner/dashboard"); 
       }
 
       resetForm();

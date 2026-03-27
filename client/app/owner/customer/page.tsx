@@ -53,7 +53,7 @@ export default function CustomersPage() {
       setCustomers(res.data.data || [])
       setTotalPages(res.data.totalPages || 1)
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to fetch customers")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to fetch customers")
     } finally {
       setLoading(false)
     }
@@ -65,7 +65,7 @@ export default function CustomersPage() {
       toast.success(res.data.message)
       fetchCustomers()
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to create customer")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to create customer")
     }
   }
 
@@ -75,7 +75,7 @@ export default function CustomersPage() {
       toast.success(res.data.message)
       fetchCustomers()
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to update customer")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to update customer")
     }
   }
 
@@ -85,7 +85,7 @@ export default function CustomersPage() {
       toast.success(res.data.message)
       fetchCustomers()
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete customer")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to delete customer")
     }
   }
 

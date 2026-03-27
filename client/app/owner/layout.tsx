@@ -5,7 +5,7 @@ import { RouteGuard } from "@/components/RouteGuard";
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <RouteGuard allowedRoles={["OWNER", "ADMIN"]}>
+    <RouteGuard allowedRoles={["OWNER", "ADMIN", "STAFF"]}>
       <SidebarProvider>
         <div className="flex h-screen w-full">
           {/* Sidebar */}

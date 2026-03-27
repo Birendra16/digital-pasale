@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BarChart3, Boxes, Building2, Home, Package, Settings, ShoppingBasketIcon, Users } from "lucide-react";
+import { BarChart3, Boxes, Building2, Home, Package, Settings, ShoppingBasketIcon, UserPlus, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +20,7 @@ const items = [
   { title: "Inventory", url: "/owner/inventory", icon: Boxes },
   { title: "Suppliers", url: "/owner/supplier", icon: Building2 },
   { title: "Customers", url: "/owner/customer", icon: Users },
+  { title: "Staff", url: "/owner/staff", icon: UserPlus },
   { title: "Sales", url: "/owner/sales", icon: BarChart3 },
   { title: "Purchase", url: "/owner/purchase", icon: ShoppingBasketIcon },
   { title: "Settings", url: "/owner/settings", icon: Settings },

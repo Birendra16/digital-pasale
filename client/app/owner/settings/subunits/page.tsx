@@ -22,7 +22,7 @@ const SubUnits = () => {
       const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/subunits`)
       setSubUnits(data.subUnits || [])
     } catch(err:any) {
-      toast.error(err.response?.data?.message || "Failed to load subunits")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to load subunits")
       throw err;
     } finally {
       setLoading(false)
@@ -36,7 +36,7 @@ const SubUnits = () => {
     toast.success(res.data.message)
     fetchSubUnits()
   } catch (err: any) {
-    toast.error(err.response?.data?.message || "Failed to create subunit")
+    if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to create subunit")
     throw err;
   }
 }
@@ -49,7 +49,7 @@ const SubUnits = () => {
 
     fetchSubUnits()
   } catch (err: any) {
-    toast.error(err.response?.data?.message || "Failed to update subunit")
+    if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to update subunit")
     throw err;
   }
 }
@@ -62,7 +62,7 @@ const SubUnits = () => {
 
     fetchSubUnits()
   } catch (err: any) {
-    toast.error(err.response?.data?.message || "Failed to delete subunit")
+    if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to delete subunit")
     throw err;
   }
 }

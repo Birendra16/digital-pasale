@@ -70,7 +70,7 @@ export default function CreateCustomer({ createCustomer }: CreateCustomerProps) 
       toast.success("Customer created successfully")
       setOpen(false)
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to create customer")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to create customer")
     } finally {
       setSubmitting(false)
     }

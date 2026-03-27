@@ -36,7 +36,7 @@ const DeleteSupplier = ({ id, fetchSuppliers }: any) => {
       await fetchSuppliers()
       setOpen(false)
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete supplier")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to delete supplier")
     } finally {
       setLoading(false)
     }

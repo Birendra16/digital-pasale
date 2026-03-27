@@ -72,7 +72,7 @@ export default function EditCustomer({ customer, editCustomer }: EditCustomerPro
       toast.success("Customer updated successfully")
       setOpen(false)
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to update customer")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to update customer")
     } finally {
       setSubmitting(false)
     }

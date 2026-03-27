@@ -5,18 +5,18 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
 
-    email: { 
-      type: String, 
-      required: true, 
+    email: {
+      type: String,
+      required: true,
       unique: true,
       lowercase: true,
       trim: true
     },
 
-    password: { 
-      type: String, 
-      required: true, 
-      select: false 
+    password: {
+      type: String,
+      required: true,
+      select: false
     },
 
     role: {
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["PENDING", "ACTIVE","REJECTED"],
+      enum: ["PENDING", "ACTIVE", "REJECTED"],
       default: "PENDING",
     },
 
@@ -40,13 +40,22 @@ const userSchema = new mongoose.Schema(
     trialEnd: {
       type: Date,
       default: null
+    },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
+    },
+    showPassword: {
+      type: String,
+      default: ""
     }
   },
   { timestamps: true }
 );
 
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+  if (!this.isModified("password") || !this.password) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 

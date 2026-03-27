@@ -45,7 +45,7 @@ const CreateSupplier = ({ fetchSuppliers }: any) => {
       resetForm()
       setOpen(false)
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to create supplier")
+      if (err?.response?.status !== 403) toast.error(err.response?.data?.message || "Failed to create supplier")
     } finally {
       setSubmitting(false)
     }

@@ -7,7 +7,7 @@ export const getDashboardMetrics = async (req, res) => {
   try {
     // 1. Basic Counts
     const customersCount = await Customer.countDocuments();
-    // const productsCount = await Product.countDocuments();
+    // const productsCount = await Product.countDocuments(); ------------
 
     // 2. Sales & Purchase Amounts
     const salesAgg = await Sales.aggregate([

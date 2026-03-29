@@ -6,6 +6,18 @@
 
 ---
 
+## 🔑 Demo Credentials
+
+Use the following credentials to log in and explore the system:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | birendra@gmail.com | AdminPassword123 |
+
+> **Note:** The Admin account has full access to approve/reject user registrations and manage the system. To test Owner or Staff flows, sign up from the demo and wait for admin approval, or use the Admin panel to approve a new account.
+
+---
+
 ## 🚀 Features
 
 ### ✅ Phase 1 — Core MVP
